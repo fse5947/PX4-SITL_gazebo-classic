@@ -57,84 +57,41 @@ namespace gazebo
     /// \brief Pointer to model containing plugin.
     protected: physics::ModelPtr model;
 
-    /// \brief Coefficient of Lift / alpha slope.
-    /// Lift = C_L * q * S
-    /// where q (dynamic pressure) = 0.5 * rho * v^2
-    protected: double cla;
-
-    /// \brief Coefficient of Drag / alpha slope.
-    /// Drag = C_D * q * S
-    /// where q (dynamic pressure) = 0.5 * rho * v^2
-    protected: double cda;
-
-    /// \brief Coefficient of Moment / alpha slope.
-    /// Moment = C_M * q * S
-    /// where q (dynamic pressure) = 0.5 * rho * v^2
-    protected: double cma;
-
-    /// \brief angle of attack when airfoil stalls
-    protected: double alphaStall;
-
-    /// \brief Cl-alpha rate after stall
-    protected: double claStall;
-
-    /// \brief Cd-alpha rate after stall
-    protected: double cdaStall;
-
-    /// \brief Cm-alpha rate after stall
-    protected: double cmaStall;
-
-    /// \breif Coefficient of Moment / control surface deflection angle slope
-    protected: double cm_delta;
-
-    /// \brief: \TODO: make a stall velocity curve
-    protected: double velocityStall;
-
-    /// \brief air density
-    /// at 25 deg C it's about 1.1839 kg/m^3
-    /// At 20 °C and 101.325 kPa, dry air has a density of 1.2041 kg/m3.
-    protected: double rho;
-
-    /// \brief if the shape is aerodynamically radially symmetric about
-    /// the forward direction. Defaults to false for wing shapes.
-    /// If set to true, the upward direction is determined by the
-    /// angle of attack.
-    protected: bool radialSymmetry;
-
-    /// \brief effective planeform surface area
-    protected: double area;
-
-    /// \brief angle of sweep
-    protected: double sweep;
-
-    /// \brief initial angle of attack
-    protected: double alpha0;
-
-    /// \brief angle of attack
+    /// \brief Air density
+    protected: double _rho;
+    /// \brief Planform surface area
+    protected: double _area;
+    /// \brief Wing span
+    protected: double _span;
+    /// \brief Wing chord length
+    protected: double _chord;
+    /// \brief Angle of Attack
     protected: double alpha;
 
-    /// \brief center of pressure in link local coordinates
-    protected: ignition::math::Vector3d cp;
-
-    /// \brief Normally, this is taken as a direction parallel to the chord
-    /// of the airfoil in zero angle of attack forward flight.
-    protected: ignition::math::Vector3d forward;
-
-    /// \brief A vector in the lift/drag plane, perpendicular to the forward
-    /// vector. Inflow velocity orthogonal to forward and upward vectors
-    /// is considered flow in the wing sweep direction.
-    protected: ignition::math::Vector3d upward;
+		/// \brief model mass
+    protected: double _mass;
 
     /// \brief Pointer to link currently targeted by mud joint.
     protected: physics::LinkPtr link;
 
-    /// \brief Pointer to a joint that actuates a control surface for
+    /// \brief Pointer to a joint that actuates the left aileron for
     /// this lifting body
-    protected: physics::JointPtr controlJoint;
+    protected: physics::JointPtr controlJoint_left_ail;
 
-    /// \brief how much to change CL per radian of control surface joint
-    /// value.
-    protected: double controlJointRadToCL;
+    /// \brief Pointer to a joint that actuates the right aileron for
+    /// this lifting body
+    protected: physics::JointPtr controlJoint_right_ail;
+
+    /// \brief Pointer to a joint that actuates the elevator for
+    /// this lifting body
+    protected: physics::JointPtr controlJoint_elev;
+
+    /// \brief Pointer to a joint that actuates the rudder for
+    /// this lifting body
+    protected: physics::JointPtr controlJoint_rudd;
+    // /// \brief how much to change CL per radian of control surface joint
+    // /// value.
+    // protected: double controlJointRadToCL;
 
     /// \brief SDF for this plugin;
     protected: sdf::ElementPtr sdf;
