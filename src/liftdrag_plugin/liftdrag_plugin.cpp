@@ -221,7 +221,7 @@ void LiftDragPlugin::OnUpdate()
   this->link->AddForce(Force_g);
   this->link->AddTorque(Moment_g);
 
-  if (1)
+  if (0)
   {
     gzdbg << "=============================\n";
     // gzdbg << "sensor: [" << this->GetHandle() << "]\n";
