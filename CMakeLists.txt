@@ -469,9 +469,12 @@ set(plugins
 
 # Linux is not consistent with plugin availability, even on Gazebo 7
 #if("${GAZEBO_VERSION}" VERSION_LESS "7.0")
-  add_library(LiftDragPlugin SHARED src/liftdrag_plugin/liftdrag_plugin.cpp
-  src/aerodynamics/aero_forces_moments.cpp)
+  add_library(LiftDragPlugin SHARED src/liftdrag_plugin/liftdrag_plugin.cpp)
   list(APPEND plugins LiftDragPlugin)
+
+  add_library(LiftDragGliderPlugin SHARED src/liftdrag_glider_plugin/liftdrag_glider_plugin.cpp
+  src/aerodynamics/aero_forces_moments.cpp)
+  list(APPEND plugins LiftDragGliderPlugin)
 
   # add_library(ForceVisual SHARED src/force_visual/force_visual.cpp)
   # list(APPEND plugins ForceVisual)
