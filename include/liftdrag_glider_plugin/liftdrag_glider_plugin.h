@@ -65,8 +65,8 @@ namespace gazebo
     protected: double _span;
     /// \brief Wing chord length
     protected: double _chord;
-    /// \brief Angle of Attack
-    protected: double alpha;
+    // / \brief Angle of Attack
+    // protected: double alpha;
 
 		/// \brief model mass
     protected: double _mass;
@@ -106,6 +106,67 @@ namespace gazebo
     private: std::string namespace_;
     private: std::string wind_sub_topic_ = "world_wind";
     private: ignition::math::Vector3d wind_vel_;
+    private: std::vector<std::pair<std::string, std::vector<float>>> out_alpha;
+    private: std::vector<std::pair<std::string, std::vector<float>>> out_mach;
+    private: std::vector<std::pair<std::string, std::vector<float>>> out_xc;
+    private: std::vector<std::pair<std::string, std::vector<float>>> out;
+    private: std::vector<std::pair<std::string, std::vector<float>>> out_sym;
+    private: std::vector<std::pair<std::string, std::vector<float>>> out_asym;
+
+    private: std::vector<float> ALPHA;
+    private: std::vector<float> MACH;
+    private: std::vector<float> XC;
+
+    private: std::vector<float> cd;
+    private: std::vector<float> cl;
+    private: std::vector<float> cm;
+    private: std::vector<float> cyb;
+    private: std::vector<float> cnb;
+    private: std::vector<float> clb;
+    private: std::vector<float> clq;
+    private: std::vector<float> cmq;
+    private: std::vector<float> clad;
+    private: std::vector<float> cmad;
+    private: std::vector<float> clp;
+    private: std::vector<float> cyp;
+    private: std::vector<float> cnp;
+    private: std::vector<float> cnr;
+    private: std::vector<float> clr;
+    private: std::vector<float> dcl;
+    private: std::vector<float> dcm;
+    private: std::vector<float> dcdi;
+    private: std::vector<float> clroll;
+    private: std::vector<float> cn_asy;
+
+    private: float CD;
+    private: float CL;
+    private: float Cm;
+    private: float CYb;
+    private: float Cnb;
+    private: float Clb;
+    private: float CLq;
+    private: float Cmq;
+    private: float CLad;
+    private: float Cmad;
+    private: float Clp;
+    private: float CYp;
+    private: float Cnp;
+    private: float Cnr;
+    private: float Clr;
+    private: float DCL;
+    private: float DCm;
+    private: float DCD;
+    private: float DCl;
+    private: float DCn;
+    private: int len_a;
+    private: int len_m;
+    private: int len_xc;
+
+    private: float alpha;
+    private: float Va;
+    private: std::vector<float> u;
+
+    public: std::vector<std::pair<std::string, std::vector<float>>> read_csv(std::string filename);
   };
 }
 #endif

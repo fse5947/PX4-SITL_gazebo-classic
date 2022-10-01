@@ -314,9 +314,9 @@
     </joint>
     <plugin name="aircraft" filename="libLiftDragGliderPlugin.so">
       <!-- Geometry -->
-      <area>0.357</area>
-      <span>2.0</span>
-      <chord>0.1806</chord>
+      <area>0.5</area>
+      <span>2.8</span>
+      <chord>0.1910</chord>
       <link_name>base_link</link_name>
       <control_joint_left_ail>
         left_elevon_joint
@@ -331,6 +331,13 @@
          rudder_joint
       </control_joint_rudd>
       <robotNamespace></robotNamespace>
+      <!-- Datcom aerodynamics csv files-->
+      <AeroAlpha_FilePath>Tools/sitl_gazebo/models/glider/aero_alpha.csv</AeroAlpha_FilePath>
+      <AeroMach_FilePath>Tools/sitl_gazebo/models/glider/aero_mach.csv</AeroMach_FilePath>
+      <AeroXc_FilePath>Tools/sitl_gazebo/models/glider/aero_xc.csv</AeroXc_FilePath>
+      <AeroCoeff_FilePath>Tools/sitl_gazebo/models/glider/aero_coeff.csv</AeroCoeff_FilePath>
+      <AeroSym_FilePath>Tools/sitl_gazebo/models/glider/aero_sym.csv</AeroSym_FilePath>
+      <AeroAsym_FilePath>Tools/sitl_gazebo/models/glider/aero_asym.csv</AeroAsym_FilePath>
     </plugin>
 
     <plugin name='puller' filename='libgazebo_motor_model.so'>

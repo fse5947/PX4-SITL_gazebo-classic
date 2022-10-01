@@ -18,6 +18,9 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
+#include <sstream>
+#include <fstream>
+
 
 #include "common.h"
 #include "gazebo/common/Assert.hh"
@@ -27,6 +30,7 @@
 #include "gazebo/msgs/msgs.hh"
 #include "liftdrag_glider_plugin/liftdrag_glider_plugin.h"
 #include "aerodynamics/aero_forces_moments.h"
+#include "aerodynamics/aero_lookup.h"
 
 using namespace gazebo;
 
@@ -129,6 +133,125 @@ void LiftDragGliderPlugin::Load(physics::ModelPtr _model,
     gzerr << "Joint with name 'control_joint_rudd' does not exist.\n";
   }
 
+  // Read Aircraft Aerodynamics
+  std::string aero_alpha_filepath;
+  std::string aero_mach_filepath;
+  std::string aero_xc_filepath;
+  std::string aero_coeff_filepath;
+  std::string aero_sym_filepath;
+  std::string aero_asym_filepath;
+
+  getSdfParam<std::string>(_sdf, "AeroAlpha_FilePath", aero_alpha_filepath,
+                          aero_alpha_filepath);
+  getSdfParam<std::string>(_sdf, "AeroMach_FilePath", aero_mach_filepath,
+                          aero_mach_filepath);
+  getSdfParam<std::string>(_sdf, "AeroXc_FilePath", aero_xc_filepath,
+                          aero_xc_filepath);
+  getSdfParam<std::string>(_sdf, "AeroCoeff_FilePath", aero_coeff_filepath,
+                          aero_coeff_filepath);
+  getSdfParam<std::string>(_sdf, "AeroSym_FilePath", aero_sym_filepath,
+                          aero_sym_filepath);
+  getSdfParam<std::string>(_sdf, "AeroAsym_FilePath", aero_asym_filepath,
+                          aero_asym_filepath);
+
+  out_alpha = read_csv(aero_alpha_filepath);
+  out_mach = read_csv(aero_mach_filepath);
+  out_xc = read_csv(aero_xc_filepath);
+  out = read_csv(aero_coeff_filepath);
+  out_sym = read_csv(aero_sym_filepath);
+  out_asym = read_csv(aero_asym_filepath);
+
+  for (int i = 0; i < out_alpha.size(); i++){
+    if (out_alpha.at(i).first == "Alpha"){
+      ALPHA = out_alpha.at(i).second;
+    }
+  }
+
+  for (int i = 0; i < out_mach.size(); i++){
+    if (out_mach.at(i).first == "Mach"){
+      MACH = out_mach.at(i).second;
+    }
+  }
+
+  for (int i = 0; i < out_xc.size(); i++){
+    if (out_xc.at(i).first == "XC"){
+      XC = out_xc.at(i).second;
+    }
+  }
+
+  for (int i = 0; i < out.size(); i++){
+    if (out.at(i).first == "CD"){
+      cd = out.at(i).second;
+    }
+    if (out.at(i).first == "CL"){
+      cl = out.at(i).second;
+    }
+    if (out.at(i).first == "Cm"){
+      cm = out.at(i).second;
+    }
+    if (out.at(i).first == "CYb"){
+      cyb = out.at(i).second;
+    }
+    if (out.at(i).first == "Cnb"){
+      cnb = out.at(i).second;
+    }
+    if (out.at(i).first == "Clb"){
+      clb = out.at(i).second;
+    }
+    if (out.at(i).first == "CLq"){
+      clq = out.at(i).second;
+    }
+    if (out.at(i).first == "Cmq"){
+      cmq = out.at(i).second;
+    }
+    if (out.at(i).first == "CLad"){
+      clad = out.at(i).second;
+    }
+    if (out.at(i).first == "Cmad"){
+      cmad = out.at(i).second;
+    }
+    if (out.at(i).first == "Clp"){
+      clp = out.at(i).second;
+    }
+    if (out.at(i).first == "CYp"){
+      cyp = out.at(i).second;
+    }
+    if (out.at(i).first == "Cnp"){
+      cnp = out.at(i).second;
+    }
+    if (out.at(i).first == "Cnr"){
+      cnr = out.at(i).second;
+    }
+    if (out.at(i).first == "Clr"){
+      clr = out.at(i).second;
+    }
+  }
+
+  for (int i = 0; i < out_sym.size(); i++){
+    if (out_sym.at(i).first == "DCL"){
+      dcl = out_sym.at(i).second;
+    }
+    if (out_sym.at(i).first == "DCm"){
+      dcm = out_sym.at(i).second;
+    }
+    if (out_sym.at(i).first == "DCl"){
+      clroll = out_sym.at(i).second;
+    }
+  }
+
+  for (int i = 0; i < out_asym.size(); i++){
+    if (out_asym.at(i).first == "DCD"){
+      dcdi = out_asym.at(i).second;
+    }
+    if (out_asym.at(i).first == "DCn"){
+      cn_asy = out_asym.at(i).second;
+    }
+  }
+
+  len_a = ALPHA.size();
+  len_m = MACH.size();
+  len_xc = XC.size();
+
 }
 
 /////////////////////////////////////////////////
@@ -189,7 +312,19 @@ void LiftDragGliderPlugin::OnUpdate()
                     controlAngle_elev * 180 / M_PI,
                     controlAngle_rudd * 180 / M_PI};
 
-  // Initialize Forces and Moments variables
+  Va = sqrt(V_r.X() * V_r.X() + V_r.Y() * V_r.Y() + V_r.Z() * V_r.Z());
+  alpha = atan2(V_r.Z(), V_r.X());
+  u = {(float) Delta[0], (float) Delta[1]};
+
+  aero_lookup(alpha, Va, u, ALPHA, MACH, XC, cd, cl, cm, cyb, cnb,
+              clb, clq, cmq, clad, cmad, clp, cyp, cnp, cnr, clr,
+              dcl, dcm, dcdi, clroll, cn_asy, &CD, &CL, &Cm, &CYb,
+              &Cnb, &Clb, &CLq, &Cmq, &CLad, &Cmad, &Clp, &CYp, &Cnp,
+              &Cnr, &Clr, &DCL, &DCm, &DCD, &DCl, &DCn, len_a, len_m, len_xc);
+
+  std::cout << CD << " " << CL << " " << Cm << std::endl;
+
+  // // Initialize Forces and Moments variables
 	double alpha_deg;
   double Fx;
   double Fy;
@@ -240,4 +375,75 @@ void LiftDragGliderPlugin::OnUpdate()
     // gzdbg << "V_w_grad: [" << _wind_gradient << "]\n";
     // gzdbg << "Vel_wind_b_grad: [" << Vel_wind_b_grad << "]\n";
   }
+}
+
+std::vector<std::pair<std::string, std::vector<float>>> LiftDragGliderPlugin::read_csv(std::string filename){
+  // Reads a CSV file into a vector of <string, vector<int>> pairs where
+  // each pair represents <column name, column values>
+
+  // Create a vector of <string, int vector> pairs to store the result
+  std::vector<std::pair<std::string, std::vector<float>>> result;
+
+  // Create an input filestream
+  std::ifstream myFile(filename);
+
+  // Make sure the file is open
+  if(!myFile.is_open()) throw std::runtime_error("Could not open file");
+
+  // Helper vars
+  std::string line, colname;
+  //    std::string token;
+  float val;
+
+  // Read the column names
+  if(myFile.good())
+  {
+    // Extract the first line in the file
+    std::getline(myFile, line);
+
+    // Create a stringstream from line
+    std::stringstream ss(line);
+
+    // Extract each column name
+    while(std::getline(ss, colname, ',')){
+      // Initialize and add <colname, int vector> pairs to result
+      result.push_back({colname, std::vector<float> {}});
+      //std::cout << colname << std::endl;
+    }
+    // std::cout << result.size() << std::endl;
+
+  }
+
+  // Read data, line by line
+  while(std::getline(myFile, line))
+  {
+    // Create a stringstream of the current line
+    std::stringstream ss(line);
+    //std::cout << ss.str() << std::endl;
+
+    // Keep track of the current column index
+    int colIdx = 0;
+
+    // Extract each value (OLD: while (ss >> val))
+    //while(std::getline(ss, token, ',')){
+    while(ss >> val){
+      // Read current stringstream token and convert to float
+      //val = std::stof(token);
+
+      // Add the current value to the 'colIdx' column's values vector
+      result.at(colIdx).second.push_back(val);
+
+      // If the next token is a comma, ignore it and move on
+      if(ss.peek() == ',') ss.ignore();
+
+      // Increment the column index
+      colIdx++;
+
+      // std::cout << colIdx << ": " << val << std::endl;
+    }
+  }
+  // Close file
+  myFile.close();
+
+  return result;
 }

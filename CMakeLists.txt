@@ -473,7 +473,10 @@ set(plugins
   list(APPEND plugins LiftDragPlugin)
 
   add_library(LiftDragGliderPlugin SHARED src/liftdrag_glider_plugin/liftdrag_glider_plugin.cpp
-  src/aerodynamics/aero_forces_moments.cpp)
+  src/aerodynamics/aero_forces_moments.cpp
+  src/aerodynamics/interp2.cpp
+  src/aerodynamics/interp3.cpp
+  src/aerodynamics/aero_lookup.cpp)
   list(APPEND plugins LiftDragGliderPlugin)
 
   # add_library(ForceVisual SHARED src/force_visual/force_visual.cpp)
