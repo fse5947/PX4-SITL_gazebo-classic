@@ -71,9 +71,9 @@ void LiftDragGliderPlugin::Load(physics::ModelPtr _model,
   GZ_ASSERT(this->physics, "LiftDragGliderPlugin physics pointer is NULL");
 
   // Read aircraft properties from .sdf
-  getSdfParam<double>(_sdf, "area", _area, _area);
-  getSdfParam<double>(_sdf, "span", _span, _span);
-  getSdfParam<double>(_sdf, "chord", _chord, _chord);
+  getSdfParam<float>(_sdf, "area", _area, _area);
+  getSdfParam<float>(_sdf, "span", _span, _span);
+  getSdfParam<float>(_sdf, "chord", _chord, _chord);
 
   GZ_ASSERT(_sdf, "LiftDragGliderPlugin _sdf pointer is NULL");
 
@@ -308,12 +308,12 @@ void LiftDragGliderPlugin::OnUpdate()
   double controlAngle_rail = -1 * this->controlJoint_right_ail->Position(0);
   double controlAngle_elev = -1 * this->controlJoint_elev->Position(0);
   double controlAngle_rudd = -1 * this->controlJoint_rudd->Position(0);
-  double Delta[3] = {controlAngle_lail * 180 / M_PI,
-                    controlAngle_elev * 180 / M_PI,
-                    controlAngle_rudd * 180 / M_PI};
+  double Delta[3] = {controlAngle_lail * 180.0 / M_PI,
+                    controlAngle_elev * 180.0 / M_PI,
+                    controlAngle_rudd * 180.0 / M_PI};
 
   Va = sqrt(V_r.X() * V_r.X() + V_r.Y() * V_r.Y() + V_r.Z() * V_r.Z());
-  alpha = atan2(V_r.Z(), V_r.X());
+  alpha = atan2(V_r.Z(), V_r.X()) * 180.0 / M_PI;
   u = {(float) Delta[0], (float) Delta[1]};
 
   aero_lookup(alpha, Va, u, ALPHA, MACH, XC, cd, cl, cm, cyb, cnb,
@@ -322,23 +322,24 @@ void LiftDragGliderPlugin::OnUpdate()
               &Cnb, &Clb, &CLq, &Cmq, &CLad, &Cmad, &Clp, &CYp, &Cnp,
               &Cnr, &Clr, &DCL, &DCm, &DCD, &DCl, &DCn, len_a, len_m, len_xc);
 
-  std::cout << CD << " " << CL << " " << Cm << std::endl;
-
   // // Initialize Forces and Moments variables
-	double alpha_deg;
-  double Fx;
-  double Fy;
-  double Fz;
-  double Mx;
-  double My;
-  double Mz;
-	double L;
-	double D;
+  float Fx;
+  float Fy;
+  float Fz;
+  float Mx;
+  float My;
+  float Mz;
+	float L;
+	float D;
+  float uu[3] = {(float) Delta[0], (float) Delta[1], (float) Delta[2]};
 
   // Get aerodynamic forces and moments
   aero_forces_moments(V_r.X(), V_r.Y(), V_r.Z(), omega_rel_b.X(),
-                      omega_rel_b.Y(), omega_rel_b.Z(), Delta, _rho,
-                      _chord, _span, _area, &alpha_deg, &Fx, &Fy, &Fz, &Mx, &My, &Mz, &L, &D);
+                      omega_rel_b.Y(), omega_rel_b.Z(), _rho,
+                      _chord, _span, _area, uu,
+                      CD, CL, Cm, CYb, Cnb, Clb, CLq, Cmq, CLad, Cmad, Clp, CYp,
+                      Cnp, Cnr, Clr, DCL, DCm, DCD, DCl, DCn,
+                      &Fx, &Fy, &Fz, &Mx, &My, &Mz, &L, &D);
 
   ignition::math::Vector3d Force_b = ignition::math::Vector3d(Fx, Fy, Fz);
   ignition::math::Vector3d Moment_b = ignition::math::Vector3d(Mx, My, Mz);
@@ -386,9 +387,6 @@ std::vector<std::pair<std::string, std::vector<float>>> LiftDragGliderPlugin::re
 
   // Create an input filestream
   std::ifstream myFile(filename);
-
-  // Make sure the file is open
-  if(!myFile.is_open()) throw std::runtime_error("Could not open file");
 
   // Helper vars
   std::string line, colname;

@@ -58,18 +58,16 @@ namespace gazebo
     protected: physics::ModelPtr model;
 
     /// \brief Air density
-    protected: double _rho;
+    protected: float _rho;
     /// \brief Planform surface area
-    protected: double _area;
+    protected: float _area;
     /// \brief Wing span
-    protected: double _span;
+    protected: float _span;
     /// \brief Wing chord length
-    protected: double _chord;
-    // / \brief Angle of Attack
-    // protected: double alpha;
+    protected: float _chord;
 
 		/// \brief model mass
-    protected: double _mass;
+    protected: float _mass;
 
     /// \brief Pointer to link currently targeted by mud joint.
     protected: physics::LinkPtr link;
