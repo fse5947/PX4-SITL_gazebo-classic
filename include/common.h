@@ -245,9 +245,12 @@ static const ignition::math::Vector3d kLeftRotation = ignition::math::Vector3d(0
 static const ignition::math::Vector3d kRightRotation = ignition::math::Vector3d(0, -1, 0);
 
 // Zurich Irchel Park
-static constexpr const double kDefaultHomeLatitude = 47.397742 * M_PI / 180.0;   // rad
-static constexpr const double kDefaultHomeLongitude = 8.545594 * M_PI / 180.0;   // rad
-static constexpr const double kDefaultHomeAltitude = 488.0;                      // meters
+// static constexpr const double kDefaultHomeLatitude = 47.397742 * M_PI / 180.0;   // rad
+// static constexpr const double kDefaultHomeLongitude = 8.545594 * M_PI / 180.0;   // rad
+// MATS (Les Coteaux)
+static constexpr const double kDefaultHomeLatitude = 0.7904442069709366;   // rad
+static constexpr const double kDefaultHomeLongitude = -1.295584258227096;   // rad
+static constexpr const double kDefaultHomeAltitude = 50.0;                      // meters
 
 // Earth radius
 static constexpr const double earth_radius = 6353000.0;      // meters
