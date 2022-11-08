@@ -14,7 +14,6 @@ void aero_forces_moments(float u_r, float v_r, float w_r, float p,
   float Va;
   float alpha;
   float beta;
-  float Mach;
   float qbarS;
   float p_s;
   float q_s;
@@ -26,7 +25,6 @@ void aero_forces_moments(float u_r, float v_r, float w_r, float p,
   Va = sqrt(u_r * u_r + v_r * v_r + w_r * w_r);
   alpha = atan2(w_r, u_r);
   beta = asin(v_r / Va);
-  Mach = Va / 343.0;
   qbarS = 0.5 * rho * S * Va * Va;
 
   /*  Rotate Body Rates p, q, r, from Body Frame to Stability Frame */

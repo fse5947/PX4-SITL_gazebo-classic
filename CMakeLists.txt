@@ -474,6 +474,7 @@ set(plugins
 
   add_library(LiftDragGliderPlugin SHARED src/liftdrag_glider_plugin/liftdrag_glider_plugin.cpp
   src/aerodynamics/aero_forces_moments.cpp
+  src/aerodynamics/interp1.cpp
   src/aerodynamics/interp2.cpp
   src/aerodynamics/interp3.cpp
   src/aerodynamics/aero_lookup.cpp)

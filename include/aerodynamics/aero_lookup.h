@@ -6,10 +6,12 @@
 #include <math.h>
 #include <vector>
 #include <algorithm>
+#include "interp1.h"
+#include "interp2.h"
 
 
-void aero_lookup(float alpha, float Va, std::vector<float> uu, std::vector<float>
-                 ALPHA, std::vector<float> MACH, std::vector<float> XC, 
+void aero_lookup(float alpha, std::vector<float> uu, std::vector<float>
+                 ALPHA, std::vector<float> XC, 
                  std::vector<float> cd, std::vector<float> cl, std::vector<float> cm,
                  std::vector<float> cyb, std::vector<float> cnb, std::vector<float>
                  clb, std::vector<float> clq, std::vector<float> cmq,
@@ -22,5 +24,5 @@ void aero_lookup(float alpha, float Va, std::vector<float> uu, std::vector<float
                  float *CLq, float *Cmq, float *CLad, float *Cmad, float
                  *Clp, float *CYp, float *Cnp, float *Cnr, float *Clr,
                  float *DCL, float *DCm, float *DCD, float *DCl, float *DCn,
-                 int len_a, int len_m, int len_xc);
+                 int len_a, int len_xc);
 #endif
