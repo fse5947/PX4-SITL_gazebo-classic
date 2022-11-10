@@ -253,7 +253,7 @@ static constexpr const double kDefaultHomeLongitude = -1.295584258227096;   // r
 static constexpr const double kDefaultHomeAltitude = 50.0;                      // meters
 
 // Earth radius
-static constexpr const double earth_radius = 6353000.0;      // meters
+static constexpr const double earth_radius = 6371000.0;      // meters
 
 /**
  * @brief Get latitude and longitude coordinates from local position

@@ -331,6 +331,7 @@
          rudder_joint
       </control_joint_rudd>
       <robotNamespace></robotNamespace>
+      <windSubTopic>world_wind</windSubTopic>
       <!-- Datcom aerodynamics csv files-->
       <AeroAlpha_FilePath>/home/fares/shearwater/px4_firmware/Tools/sitl_gazebo/models/glider/aero_alpha.csv</AeroAlpha_FilePath>
       <AeroMach_FilePath>/home/fares/shearwater/px4_firmware/Tools/sitl_gazebo/models/glider/aero_mach.csv</AeroMach_FilePath>

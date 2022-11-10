@@ -31,6 +31,7 @@
 #include <gazebo/physics/physics.hh>
 
 #include "Wind.pb.h"
+#include <Groundtruth.pb.h>
 
 namespace gazebo {
 // Default values
@@ -51,6 +52,9 @@ static const ignition::math::Vector3d kDefaultWindDirectionMean = ignition::math
 static const ignition::math::Vector3d kDefaultWindGustDirectionMean = ignition::math::Vector3d(0, 1, 0);
 static constexpr double kDefaultWindDirectionVariance = 0.0;
 static constexpr double kDefaultWindGustDirectionVariance = 0.0;
+
+typedef const boost::shared_ptr<const sensor_msgs::msgs::Groundtruth> GtPtr;
+static const std::string kDefaultGroundtruthTopic = "/groundtruth";
 
 /// \brief This gazebo plugin simulates wind acting on a model.
 class GazeboWindPlugin : public WorldPlugin {
@@ -96,6 +100,8 @@ class GazeboWindPlugin : public WorldPlugin {
   std::string frame_id_;
   std::string wind_pub_topic_;
 
+  void GroundtruthCallback(GtPtr& groundtruth_msg);
+
   double wind_velocity_mean_;
   double wind_velocity_max_;
   double wind_velocity_variance_;
@@ -125,8 +131,23 @@ class GazeboWindPlugin : public WorldPlugin {
   common::Time wind_gust_start_;
   common::Time last_time_;
 
+  double groundtruth_lat_rad_{0.0};
+  double groundtruth_lon_rad_{0.0};
+  double groundtruth_altitude_{0.0};
+  double gps_x{0.0};
+  double gps_y{0.0};
+
+  std::vector<double> thermal_strengths_;
+  std::vector<double> thermal_radii_;
+  std::vector<ignition::math::Vector3d> thermal_centers_;
+  
+  bool in_thermal_{false};
+  bool using_thermal_{false};
+
   transport::NodePtr node_handle_;
   transport::PublisherPtr wind_pub_;
+  transport::SubscriberPtr groundtruth_sub_{nullptr};
+  std::string groundtruth_sub_topic_{kDefaultGroundtruthTopic};
 
   physics_msgs::msgs::Wind wind_msg;
 };

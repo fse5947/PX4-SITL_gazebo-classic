@@ -15,18 +15,31 @@
     <plugin name='wind_plugin' filename='libgazebo_wind_plugin.so'>
       <frameId>base_link</frameId>
       <robotNamespace/>
-      <windVelocityMean>4.0</windVelocityMean>
-      <windVelocityMax>20.0</windVelocityMax>
+      <windVelocityMean>0.0</windVelocityMean>
+      <windVelocityMax>0.0</windVelocityMax>
       <windVelocityVariance>0</windVelocityVariance>
       <windDirectionMean>0 1 0</windDirectionMean>
       <windDirectionVariance>0</windDirectionVariance>
       <windGustStart>0</windGustStart>
       <windGustDuration>0</windGustDuration>
       <windGustVelocityMean>0</windGustVelocityMean>
-      <windGustVelocityMax>20.0</windGustVelocityMax>
+      <windGustVelocityMax>0.0</windGustVelocityMax>
       <windGustVelocityVariance>0</windGustVelocityVariance>
       <windGustDirectionMean>1 0 0</windGustDirectionMean>
       <windGustDirectionVariance>0</windGustDirectionVariance>
+      <!-- Thermal Updraft-->
+      <Thermals>
+        <Thermal_1>
+      		<centerCoordinates>45.289421 -74.225136 0</centerCoordinates>
+          <ThermalStrength>5.0</ThermalStrength>
+          <ThermalRadius>150.0</ThermalRadius>
+				</Thermal_1>
+				<Thermal_2>
+      		<centerCoordinates>45.293080 -74.228394 0</centerCoordinates>
+          <ThermalStrength>4.0</ThermalStrength>
+          <ThermalRadius>150.0</ThermalRadius>
+				</Thermal_2>
+      </Thermals>
       <windPubTopic>world_wind</windPubTopic>
     </plugin>
     <physics name='default_physics' default='0' type='ode'>

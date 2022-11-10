@@ -22,6 +22,8 @@
 #include "gazebo_wind_plugin.h"
 #include "common.h"
 
+#include <iostream>
+
 namespace gazebo {
 
 GazeboWindPlugin::~GazeboWindPlugin() {
@@ -64,6 +66,8 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
   getSdfParam<ignition::math::Vector3d>(sdf, "windGustDirectionMean", wind_gust_direction_mean_, wind_gust_direction_mean_);
   getSdfParam<double>(sdf, "windGustDirectionVariance", wind_gust_direction_variance_, wind_gust_direction_variance_);
 
+  groundtruth_sub_ = node_handle_->Subscribe("~/glider" + groundtruth_sub_topic_, &GazeboWindPlugin::GroundtruthCallback, this);
+
   wind_direction_mean_.Normalize();
   wind_gust_direction_mean_.Normalize();
   wind_gust_start_ = common::Time(wind_gust_start);
@@ -80,6 +84,62 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
   wind_gust_direction_distribution_X_.param(std::normal_distribution<double>::param_type(wind_gust_direction_mean_.X(), sqrt(wind_gust_direction_variance_)));
   wind_gust_direction_distribution_Y_.param(std::normal_distribution<double>::param_type(wind_gust_direction_mean_.Y(), sqrt(wind_gust_direction_variance_)));
   wind_gust_direction_distribution_Z_.param(std::normal_distribution<double>::param_type(wind_gust_direction_mean_.Z(), sqrt(wind_gust_direction_variance_)));
+
+  // Get thermal updraft params from SDF
+  if (sdf->HasElement("Thermals")) {
+		sdf::ElementPtr thermals = sdf->GetElement("Thermals");
+		sdf::ElementPtr thermal = thermals->GetFirstElement();
+
+		ignition::math::Vector3d centerCoordinates_DEG = ignition::math::Vector3d(0.0, 0.0, 0.0);
+    double thermal_strength_{0.0};
+    double thermal_radius_{50.0};
+
+    double lat_home_ = kDefaultHomeLatitude;
+    double lon_home_ = kDefaultHomeLongitude;
+
+		while( thermal != nullptr && thermal->HasElement("centerCoordinates")) {
+
+			using_thermal_ = true;
+
+			getSdfParam<ignition::math::Vector3d>(thermal, "centerCoordinates", centerCoordinates_DEG, centerCoordinates_DEG);
+      getSdfParam<double>(thermal, "ThermalStrength", thermal_strength_, thermal_strength_);
+      getSdfParam<double>(thermal, "ThermalRadius", thermal_radius_, thermal_radius_);
+
+      std::cout << centerCoordinates_DEG << std::endl;
+
+			const double lat_rad = centerCoordinates_DEG.X() * M_PI / 180.0;
+			const double lon_rad = centerCoordinates_DEG.Y() * M_PI / 180.0;
+			const double sin_lat = sin(lat_rad);
+			const double cos_lat = cos(lat_rad);
+			const double ref_sin_lat = sin(lat_home_);
+			const double ref_cos_lat = cos(lat_home_);
+			const double cos_d_lon = cos(lon_rad - lon_home_);
+			const double arg = fmin(fmax(ref_sin_lat * sin_lat + ref_cos_lat * cos_lat * cos_d_lon, -1.0),  1.0);
+			const double c = acos(arg);
+			double k = 1.0;
+
+			if (fabs(c) > 0) {
+				k = (c / sin(c));
+			}
+
+			double x = static_cast<float>(k * (ref_cos_lat * sin_lat - ref_sin_lat * cos_lat * cos_d_lon) * earth_radius);
+			double y = static_cast<float>(k * cos_lat * sin(lon_rad - lon_home_) * earth_radius);
+
+			ignition::math::Vector3d centerCoordinates_ENU(y,x,0.0);
+
+			thermal_centers_.push_back(centerCoordinates_ENU);
+      thermal_strengths_.push_back(thermal_strength_);
+      thermal_radii_.push_back(thermal_radius_);
+
+			gzdbg << "Adding thermal at lat: "<< centerCoordinates_DEG.X()<<", lon: "<< centerCoordinates_DEG.Y() << "], ENU: ["<< centerCoordinates_ENU.X()<<","<< centerCoordinates_ENU.Y() << "]\n";
+
+			thermal = thermal->GetNextElement();
+		}
+
+	} else {
+		gzdbg << "[gazebo_wind_plugin] No Thermals.\n";
+		using_thermal_ = false;
+	}
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
@@ -134,10 +194,57 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
     wind_gust = wind_gust_strength * wind_gust_direction;
   }
 
+  // Calculate wind from thermal updrafts
+
+  ignition::math::Vector3d wind_thermal(0, 0, 0); // Wind speed from thermal
+
+  // Distances from thermal
+	double thermal_dist = -1.0;
+	double dist_x = -1.0;
+	double dist_y = -1.0;
+	int closest_thermal = -1;
+	for (int i = 0; i < thermal_centers_.size(); i++) {
+		ignition::math::Vector3d thermal_center = thermal_centers_.at(i);
+		double current_dist_x = fabs(thermal_center.X() - gps_x);
+		double current_dist_y = fabs(thermal_center.Y() - gps_y);
+
+		double current_thermal_dist = sqrt(current_dist_x * current_dist_x + current_dist_y * current_dist_y);
+
+		if (i == 0 || thermal_dist > current_thermal_dist) {
+			closest_thermal = i;
+			thermal_dist = current_thermal_dist;
+			dist_x = current_dist_x;
+			dist_y = current_dist_y;
+		}
+	}
+
+	if (thermal_dist < 0.0 || dist_x < 0.0 || dist_y < 0.0) {
+		gzerr << "Invalid Thermal distance \n";
+	}
+
+  std::cout << "Distance from thermal: " << thermal_dist << std::endl;
+
+  if (thermal_dist < 3 * thermal_radii_.at(closest_thermal)) {
+    wind_thermal.Z() = thermal_strengths_.at(closest_thermal) *
+                    exp(-pow(thermal_dist/thermal_radii_.at(closest_thermal),2.0)) *
+                    (1 - pow(thermal_dist/thermal_radii_.at(closest_thermal),2.0));
+
+  if (!in_thermal_) {
+      gzmsg << "Entered Thermal #"<< closest_thermal << "\n";
+      in_thermal_ = true;
+    }
+
+  } else if (in_thermal_) {
+    gzmsg << "Left Thermal\n";
+    in_thermal_ = false;
+  }
+
+  std::cout << wind_thermal.Z() << std::endl;
+
   gazebo::msgs::Vector3d* wind_v = new gazebo::msgs::Vector3d();
   wind_v->set_x(wind.X() + wind_gust.X());
   wind_v->set_y(wind.Y() + wind_gust.Y());
-  wind_v->set_z(wind.Z() + wind_gust.Z());
+  wind_v->set_z(wind.Z() + wind_gust.Z() + wind_thermal.Z());
 
   wind_msg.set_frame_id(frame_id_);
   wind_msg.set_time_usec(now.Double() * 1e6);
@@ -147,4 +254,33 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
 }
 
 GZ_REGISTER_WORLD_PLUGIN(GazeboWindPlugin);
+
+void GazeboWindPlugin::GroundtruthCallback(GtPtr& groundtruth_msg) {
+  // receive groundtruth lat_rad, lon_rad and altitude from gps plugin
+  groundtruth_lat_rad_ = groundtruth_msg->latitude_rad();
+  groundtruth_lon_rad_ = groundtruth_msg->longitude_rad();
+  groundtruth_altitude_ = groundtruth_msg->altitude();
+
+  double lat_home_ = kDefaultHomeLatitude;
+  double lon_home_ = kDefaultHomeLongitude;
+
+  const double sin_lat = sin(groundtruth_lat_rad_);
+  const double cos_lat = cos(groundtruth_lat_rad_);
+  const double ref_sin_lat = sin(lat_home_);
+  const double ref_cos_lat = cos(lat_home_);
+  const double cos_d_lon = cos(groundtruth_lon_rad_ - lon_home_);
+  const double arg = fmin(fmax(ref_sin_lat * sin_lat + ref_cos_lat * cos_lat * cos_d_lon, -1.0),  1.0);
+  const double c = acos(arg);
+  double k = 1.0;
+
+  if (fabs(c) > 0) {
+    k = (c / sin(c));
+  }
+
+  gps_x = static_cast<float>(k * (ref_cos_lat * sin_lat - ref_sin_lat * cos_lat * cos_d_lon) * earth_radius);
+  gps_y = static_cast<float>(k * cos_lat * sin(groundtruth_lon_rad_ - lon_home_) * earth_radius);
 }
+
+}
+
+

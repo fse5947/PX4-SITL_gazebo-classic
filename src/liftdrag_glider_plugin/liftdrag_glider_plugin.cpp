@@ -46,6 +46,8 @@ LiftDragGliderPlugin::LiftDragGliderPlugin()
 
   // Initialize aero variables
   _rho = 1.225f;
+
+  this->wind_vel_ = ignition::math::Vector3d(0.0, 0.0, 0.0);
 }
 
 /////////////////////////////////////////////////
@@ -131,6 +133,11 @@ void LiftDragGliderPlugin::Load(physics::ModelPtr _model,
   if (!this->controlJoint_rudd)
   {
     gzerr << "Joint with name 'control_joint_rudd' does not exist.\n";
+  }
+
+  if (_sdf->HasElement("windSubTopic")){
+    this->wind_sub_topic_ = _sdf->Get<std::string>("windSubTopic");
+    wind_sub_ = node_handle_->Subscribe("~/" + wind_sub_topic_, &LiftDragGliderPlugin::WindVelocityCallback, this);
   }
 
   // Read Aircraft Aerodynamics
@@ -284,7 +291,7 @@ void LiftDragGliderPlugin::OnUpdate()
   // Velocities
   // Body Velocity in Px4 body frame (FRD)
   ignition::math::Vector3d Vel_b = q_FLU_to_FRD.RotateVector(this->link->RelativeLinearVel()); // FLU to FRD
-  ignition::math::Vector3d Vel_wind_b(0,0,0); // = q_ENU_to_FRD.RotateVector(_wind_speed);
+  ignition::math::Vector3d Vel_wind_b = q_ENU_to_FRD.RotateVector(wind_vel_);
   ignition::math::Vector3d V_r = Vel_b - Vel_wind_b; // Relative Velocity
 
 	double TAS = V_r.Length();
@@ -312,15 +319,14 @@ void LiftDragGliderPlugin::OnUpdate()
                     controlAngle_elev * 180.0 / M_PI,
                     controlAngle_rudd * 180.0 / M_PI};
 
-  Va = sqrt(V_r.X() * V_r.X() + V_r.Y() * V_r.Y() + V_r.Z() * V_r.Z());
   alpha = atan2(V_r.Z(), V_r.X()) * 180.0 / M_PI;
   u = {(float) Delta[0], (float) Delta[1]};
 
-  aero_lookup(alpha, Va, u, ALPHA, MACH, XC, cd, cl, cm, cyb, cnb,
+  aero_lookup(alpha, u, ALPHA, XC, cd, cl, cm, cyb, cnb,
               clb, clq, cmq, clad, cmad, clp, cyp, cnp, cnr, clr,
               dcl, dcm, dcdi, clroll, cn_asy, &CD, &CL, &Cm, &CYb,
               &Cnb, &Clb, &CLq, &Cmq, &CLad, &Cmad, &Clp, &CYp, &Cnp,
-              &Cnr, &Clr, &DCL, &DCm, &DCD, &DCl, &DCn, len_a, len_m, len_xc);
+              &Cnr, &Clr, &DCL, &DCm, &DCD, &DCl, &DCn, len_a, len_xc);
 
   // // Initialize Forces and Moments variables
   float Fx;
@@ -376,6 +382,12 @@ void LiftDragGliderPlugin::OnUpdate()
     // gzdbg << "V_w_grad: [" << _wind_gradient << "]\n";
     // gzdbg << "Vel_wind_b_grad: [" << Vel_wind_b_grad << "]\n";
   }
+}
+
+void LiftDragGliderPlugin::WindVelocityCallback(const boost::shared_ptr<const physics_msgs::msgs::Wind> &msg) {
+  wind_vel_ = ignition::math::Vector3d(msg->velocity().x(),
+            msg->velocity().y(),
+            msg->velocity().z());
 }
 
 std::vector<std::pair<std::string, std::vector<float>>> LiftDragGliderPlugin::read_csv(std::string filename){
