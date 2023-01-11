@@ -39,12 +39,12 @@ void aero_forces_moments(float u_r, float v_r, float w_r, float p,
 
   *L = -qbarS * (CL + CLq * q_s * cbar / (2.0 * Va) + DCL);
 
-  l = qbarS * b * (Clb * beta * 180.0 / M_PI + Clp * p_s * b / (2.0 * Va) + DCl + 0.0012*u[2] * M_PI/180);
+  l = qbarS * b * (Clb * beta * 180.0 / M_PI + Clp * p_s * b / (2.0 * Va) + DCl + 0.0004*u[2] * M_PI/180);
 
   *My = qbarS * cbar * (Cm + Cmq * q_s * cbar / (2.0 * Va) + DCm);
 
   n = qbarS * b * (Cnb * beta * 180.0 / M_PI +
-      (Cnp * p_s + Cnr * r_s) * b / (2.0 * Va) + DCn + -0.05*u[2] * M_PI/180);
+      (Cnp * p_s + Cnr * r_s) * b / (2.0 * Va) + DCn + -0.02*u[2] * M_PI/180);
 
   /*  Transform Forces and Moments from Stability Frame to Body Frame */
   *Fx = cos(alpha) * *D - sin(alpha) * *L;
