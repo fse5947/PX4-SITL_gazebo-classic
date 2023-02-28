@@ -333,12 +333,12 @@
       <robotNamespace></robotNamespace>
       <windSubTopic>world_wind</windSubTopic>
       <!-- Datcom aerodynamics csv files-->
-      <AeroAlpha_FilePath>/home/fares/shearwater/px4_firmware/Tools/sitl_gazebo/models/glider/aero_alpha.csv</AeroAlpha_FilePath>
-      <AeroMach_FilePath>/home/fares/shearwater/px4_firmware/Tools/sitl_gazebo/models/glider/aero_mach.csv</AeroMach_FilePath>
-      <AeroXc_FilePath>/home/fares/shearwater/px4_firmware/Tools/sitl_gazebo/models/glider/aero_xc.csv</AeroXc_FilePath>
-      <AeroCoeff_FilePath>/home/fares/shearwater/px4_firmware/Tools/sitl_gazebo/models/glider/aero_coeff.csv</AeroCoeff_FilePath>
-      <AeroSym_FilePath>/home/fares/shearwater/px4_firmware/Tools/sitl_gazebo/models/glider/aero_sym.csv</AeroSym_FilePath>
-      <AeroAsym_FilePath>/home/fares/shearwater/px4_firmware/Tools/sitl_gazebo/models/glider/aero_asym.csv</AeroAsym_FilePath>
+      <AeroAlpha_FilePath>model://glider/aero_alpha.csv</AeroAlpha_FilePath>
+      <AeroMach_FilePath>model://glider/aero_mach.csv</AeroMach_FilePath>
+      <AeroXc_FilePath>model://glider/aero_xc.csv</AeroXc_FilePath>
+      <AeroCoeff_FilePath>model://glider/aero_coeff.csv</AeroCoeff_FilePath>
+      <AeroSym_FilePath>model://glider/aero_sym.csv</AeroSym_FilePath>
+      <AeroAsym_FilePath>model://glider/aero_asym.csv</AeroAsym_FilePath>
     </plugin>
 
     <plugin name='puller' filename='libgazebo_motor_model.so'>

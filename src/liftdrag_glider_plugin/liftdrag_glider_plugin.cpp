@@ -20,6 +20,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include <sdf/SDFImpl.hh>
 
 
 #include "common.h"
@@ -148,25 +149,34 @@ void LiftDragGliderPlugin::Load(physics::ModelPtr _model,
   std::string aero_sym_filepath;
   std::string aero_asym_filepath;
 
-  getSdfParam<std::string>(_sdf, "AeroAlpha_FilePath", aero_alpha_filepath,
+  bool missing_param = false;
+  missing_param |= !getSdfParam<std::string>(_sdf, "AeroAlpha_FilePath", aero_alpha_filepath,
                           aero_alpha_filepath);
-  getSdfParam<std::string>(_sdf, "AeroMach_FilePath", aero_mach_filepath,
+  missing_param |= !getSdfParam<std::string>(_sdf, "AeroMach_FilePath", aero_mach_filepath,
                           aero_mach_filepath);
-  getSdfParam<std::string>(_sdf, "AeroXc_FilePath", aero_xc_filepath,
+  missing_param |= !getSdfParam<std::string>(_sdf, "AeroXc_FilePath", aero_xc_filepath,
                           aero_xc_filepath);
-  getSdfParam<std::string>(_sdf, "AeroCoeff_FilePath", aero_coeff_filepath,
+  missing_param |= !getSdfParam<std::string>(_sdf, "AeroCoeff_FilePath", aero_coeff_filepath,
                           aero_coeff_filepath);
-  getSdfParam<std::string>(_sdf, "AeroSym_FilePath", aero_sym_filepath,
+  missing_param |= !getSdfParam<std::string>(_sdf, "AeroSym_FilePath", aero_sym_filepath,
                           aero_sym_filepath);
-  getSdfParam<std::string>(_sdf, "AeroAsym_FilePath", aero_asym_filepath,
+  missing_param |= !getSdfParam<std::string>(_sdf, "AeroAsym_FilePath", aero_asym_filepath,
                           aero_asym_filepath);
 
-  out_alpha = read_csv(aero_alpha_filepath);
-  out_mach = read_csv(aero_mach_filepath);
-  out_xc = read_csv(aero_xc_filepath);
-  out = read_csv(aero_coeff_filepath);
-  out_sym = read_csv(aero_sym_filepath);
-  out_asym = read_csv(aero_asym_filepath);
+  if (missing_param) {
+    gzerr << "[liftdrag_glider_plugin] Missing Aero table filepath parameter.\n";
+  }
+
+  out_alpha = read_csv(sdf::findFile(aero_alpha_filepath));
+  out_mach = read_csv(sdf::findFile(aero_mach_filepath));
+  out_xc = read_csv(sdf::findFile(aero_xc_filepath));
+  out = read_csv(sdf::findFile(aero_coeff_filepath));
+  out_sym = read_csv(sdf::findFile(aero_sym_filepath));
+  out_asym = read_csv(sdf::findFile(aero_asym_filepath));
+
+  if (out_alpha.empty() || out_mach.empty() || out_xc.empty() || out.empty() || out_sym.empty() || out_asym.empty() ) {
+    gzerr << "[liftdrag_glider_plugin] Aero tables incorrectly loaded.\n";
+  }
 
   for (int i = 0; i < out_alpha.size(); i++){
     if (out_alpha.at(i).first == "Alpha"){
