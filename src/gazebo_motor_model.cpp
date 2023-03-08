@@ -32,9 +32,11 @@ GazeboMotorModel::~GazeboMotorModel() {
 void GazeboMotorModel::InitializeParams() {}
 
 void GazeboMotorModel::Publish() {
-  turning_velocity_msg_.set_data(joint_->GetVelocity(0));
+  //turning_velocity_msg_.set_data(joint_->GetVelocity(0));
   // FIXME: Commented out to prevent warnings about queue limit reached.
   // motor_velocity_pub_->Publish(turning_velocity_msg_);
+  power_msg_.set_data(power_);
+  motor_power_pub_->Publish(power_msg_);
 }
 
 void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
@@ -124,11 +126,13 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   getSdfParam<std::string>(_sdf, "commandSubTopic", command_sub_topic_, command_sub_topic_);
   getSdfParam<std::string>(_sdf, "motorSpeedPubTopic", motor_speed_pub_topic_,
                            motor_speed_pub_topic_);
-
+  getSdfParam<std::string>(_sdf, "motorPowerPubTopic", motor_power_pub_topic_,
+                           motor_power_pub_topic_);
   getSdfParam<double>(_sdf, "rotorDragCoefficient", rotor_drag_coefficient_, rotor_drag_coefficient_);
   getSdfParam<double>(_sdf, "rollingMomentCoefficient", rolling_moment_coefficient_,
                       rolling_moment_coefficient_);
   getSdfParam<double>(_sdf, "maxRotVelocity", max_rot_velocity_, max_rot_velocity_);
+  getSdfParam<double>(_sdf, "maxPower", max_power_, max_power_);
   getSdfParam<double>(_sdf, "motorConstant", motor_constant_, motor_constant_);
   getSdfParam<double>(_sdf, "momentConstant", moment_constant_, moment_constant_);
 
@@ -154,6 +158,7 @@ void GazeboMotorModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) {
   motor_failure_sub_ = node_handle_->Subscribe<msgs::Int>(motor_failure_sub_topic_, &GazeboMotorModel::MotorFailureCallback, this);
   // FIXME: Commented out to prevent warnings about queue limit reached.
   //motor_velocity_pub_ = node_handle_->Advertise<std_msgs::msgs::Float>("~/" + model_->GetName() + motor_speed_pub_topic_, 1);
+  motor_power_pub_ = node_handle_->Advertise<std_msgs::msgs::Float>("~/" + model_->GetName() + motor_power_pub_topic_, 1);
   wind_sub_ = node_handle_->Subscribe("~/" + wind_sub_topic_, &GazeboMotorModel::WindVelocityCallback, this);
 
   // Create the first order filter.
@@ -177,6 +182,7 @@ void GazeboMotorModel::OnUpdate(const common::UpdateInfo& _info) {
   sampling_time_ = _info.simTime.Double() - prev_sim_time_;
   prev_sim_time_ = _info.simTime.Double();
   UpdateForcesAndMoments();
+  UpdatePower();
   UpdateMotorFail();
   Publish();
 }
@@ -296,6 +302,14 @@ void GazeboMotorModel::UpdateMotorFail() {
        screen_msg_flag = 1;
      }
   }
+}
+
+void GazeboMotorModel::UpdatePower() {
+
+  motor_rot_vel_ = joint_->GetVelocity(0);
+  double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
+
+  power_ = ignition::math::clamp(std::abs(real_motor_velocity) / max_rot_velocity_, 0.0, 1.0) * max_power_;
 }
 
 void GazeboMotorModel::WindVelocityCallback(WindPtr& msg) {

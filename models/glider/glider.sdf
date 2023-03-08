@@ -349,6 +349,7 @@
       <timeConstantUp>0.0125</timeConstantUp>
       <timeConstantDown>0.025</timeConstantDown>
       <maxRotVelocity>3500</maxRotVelocity>
+      <maxPower>700</maxPower>
       <motorConstant>8.54858e-06</motorConstant>
       <momentConstant>0.0</momentConstant>
       <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
@@ -356,6 +357,7 @@
       <rotorDragCoefficient>0.0</rotorDragCoefficient>
       <rollingMomentCoefficient>0.0</rollingMomentCoefficient>
       <motorSpeedPubTopic>/motor_speed/4</motorSpeedPubTopic>
+      <motorSpeedPubTopic>/motor_power/4</motorSpeedPubTopic>
       <rotorVelocitySlowdownSim>15</rotorVelocitySlowdownSim>
       <robotNamespace></robotNamespace>
     </plugin>
