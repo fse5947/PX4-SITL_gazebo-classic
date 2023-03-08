@@ -122,6 +122,15 @@ namespace SensorData {
         double satellites_visible;
         int id;
     };
+
+    struct Battery
+    {
+        int voltage;
+        int current;
+        int battery_remaining;
+        int id;
+    };
+
 }
 
 struct HILData {
@@ -153,6 +162,7 @@ public:
     void close();
     void Load();
     void SendHeartbeat();
+    void SendBatteryMessages(const SensorData::Battery &data);
     void SendSensorMessages(const uint64_t time_usec);
     void SendSensorMessages(const uint64_t time_usec, HILData &hil_data);
     void SendGpsMessages(const SensorData::Gps &data);

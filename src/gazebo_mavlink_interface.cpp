@@ -809,6 +809,12 @@ void GazeboMavlinkInterface::GpsCallback(GpsPtr& gps_msg, const int& id) {
   gps_data.id = id;
 
   mavlink_interface_->SendGpsMessages(gps_data);
+
+  SensorData::Battery battery_data;
+  battery_data.voltage = 16000;
+  battery_data.current = 400;
+  battery_data.id = 1;
+  mavlink_interface_->SendBatteryMessages(battery_data);
 }
 
 void GazeboMavlinkInterface::GroundtruthCallback(GtPtr& groundtruth_msg) {
@@ -1143,7 +1149,7 @@ void GazeboMavlinkInterface::handle_control(double _dt)
       {
         double current = joints_[i]->GetVelocity(0);
         double err = current - target;
-        double force = pids_[i].Update(err, _dt);
+        double force = pids_[i].Update(err, _dt); // PID  is all 0 unless joint_control_pid is set
         joints_[i]->SetForce(0, force);
       }
       else if (joint_control_type_[i] == "position")
