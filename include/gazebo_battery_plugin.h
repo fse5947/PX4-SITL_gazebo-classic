@@ -64,8 +64,9 @@ namespace gazebo {
   static const std::string DEFAULT_MOTOR_POWER_TOPIC = "/motor_power";
 
   static constexpr unsigned int DEFAULT_PUB_RATE = 50;  // [Hz].
-  static constexpr double DEFAULT_CAPACITY = 100.0; // [mWh]
+  static constexpr double DEFAULT_NOMINAL_CAPACITY = 100.0; // [mWh]
   static constexpr double DEFAULT_NOMINAL_VOLTAGE = 16.8; // [V]
+  static constexpr double DEFAULT_EFFICIENCY = 0.9; // [V]
 
   typedef const boost::shared_ptr<const std_msgs::msgs::Float> FloatPtr;
 
@@ -75,10 +76,11 @@ namespace gazebo {
     power_(0.0),
     pub_rate_(DEFAULT_PUB_RATE),
     battery_topic_(DEFAULT_BATTERY_TOPIC),
-    current_capacity_(DEFAULT_CAPACITY),
-    nominal_capacity_(DEFAULT_CAPACITY),
+    current_capacity_(DEFAULT_NOMINAL_CAPACITY),
+    nominal_capacity_(DEFAULT_NOMINAL_CAPACITY),
     nominal_voltage_(DEFAULT_NOMINAL_VOLTAGE),
-    motor_power_sub_topic_(DEFAULT_MOTOR_POWER_TOPIC)
+    motor_power_sub_topic_(DEFAULT_MOTOR_POWER_TOPIC),
+    efficiency_(DEFAULT_EFFICIENCY)
     {};
 
     virtual ~BatteryPlugin();
@@ -112,6 +114,8 @@ namespace gazebo {
     double nominal_voltage_;
     double current_capacity_;
     double nominal_capacity_;
+
+    double efficiency_;
 
   }; // class BatteryPlugin
 } // namespace gazebo

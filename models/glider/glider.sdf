@@ -381,9 +381,9 @@
       <robotNamespace/>
       <pubRate>50</pubRate>
       <batteryTopic>/battery</batteryTopic>
-      <batteryCapacity>800</batteryCapacity>
-      <batteryNominalCapacity>1000</batteryNominalCapacity>
-      <nominalVoltage>16.9</nominalVoltage>
+      <!--<capacity>800</capacity>-->
+      <nominalCapacity>1000</nominalCapacity>
+      <nominalVoltage>12.6</nominalVoltage>
     </plugin>
     <plugin name='mavlink_interface' filename='libgazebo_mavlink_interface.so'>
       <robotNamespace></robotNamespace>

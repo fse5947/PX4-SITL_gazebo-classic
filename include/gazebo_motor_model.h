@@ -18,7 +18,8 @@
  * limitations under the License.
  */
 
-
+#ifndef _GAZEBO_MOTOR_MODEL_HH_
+#define _GAZEBO_MOTOR_MODEL_HH_
 
 #include <stdio.h>
 
@@ -72,6 +73,7 @@ static constexpr double kDefaulMaxRotVelocity = 838.0;
 static constexpr double kDefaultRotorDragCoefficient = 1.0e-4;
 static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
 static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
+static constexpr double kDefaultMotorEfficiency = 0.9;
 
 class GazeboMotorModel : public MotorModel, public ModelPlugin {
  public:
@@ -180,3 +182,4 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
 */
 };
 }
+#endif // _GAZEBO_MOTOR_MODEL_HH_

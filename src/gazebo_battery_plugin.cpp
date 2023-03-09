@@ -63,9 +63,11 @@ void BatteryPlugin::getSdfParams(sdf::ElementPtr sdf)
   getSdfParam<std::string>(sdf,"batteryTopic",battery_topic_,battery_topic_,true);
   getSdfParam<std::string>(sdf,"motorPowerSubTopic",motor_power_sub_topic_,motor_power_sub_topic_,true);
   getSdfParam<unsigned int>(sdf,"pubRate",pub_rate_,pub_rate_,true);
-  getSdfParam<double>(sdf,"batteryCapacity",current_capacity_,current_capacity_,true);
-  getSdfParam<double>(sdf,"batteryNominalCapacity",nominal_capacity_,nominal_capacity_,true);
+  getSdfParam<double>(sdf,"nominalCapacity",nominal_capacity_,nominal_capacity_,true);
+  getSdfParam<double>(sdf,"capacity",current_capacity_,nominal_capacity_,true);
+  current_capacity_ = std::min(current_capacity_,nominal_capacity_);
   getSdfParam<double>(sdf,"nominalVoltage",nominal_voltage_,nominal_voltage_,true);
+  getSdfParam<double>(sdf,"efficiency_",efficiency_,efficiency_,true);
 }
 
 void BatteryPlugin::Load(physics::ModelPtr model, sdf::ElementPtr sdf)
@@ -104,9 +106,9 @@ void BatteryPlugin::PowerCallback(FloatPtr  &power_msg)
 #endif
   const double dt = (current_time - last_time_).Double();
 
-  power_ = power_msg->data();
+  power_ = power_msg->data() / efficiency_;
 
-  current_capacity_ -= power_ * dt / 3600;
+  current_capacity_ -= power_ * dt / 3600.0;
 
   last_time_ = current_time;
 }
