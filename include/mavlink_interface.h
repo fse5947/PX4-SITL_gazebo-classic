@@ -127,7 +127,8 @@ namespace SensorData {
     {
         int voltage;
         int current;
-        int battery_remaining;
+        int remaining_pct;
+        int temperature;
         int id;
     };
 

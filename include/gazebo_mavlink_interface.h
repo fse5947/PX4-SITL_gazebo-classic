@@ -69,6 +69,7 @@
 #include <MagneticField.pb.h>
 #include <Pressure.pb.h>
 #include <Wind.pb.h>
+#include <Battery.pb.h>
 
 #include "mavlink_interface.h"
 #include "msgbuffer.h"
@@ -93,6 +94,7 @@ typedef const boost::shared_ptr<const sensor_msgs::msgs::Range> LidarPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::SITLGps> GpsPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> MagnetometerPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Pressure> BarometerPtr;
+typedef const boost::shared_ptr<const sensor_msgs::msgs::Battery> BatteryPtr;
 typedef const boost::shared_ptr<const physics_msgs::msgs::Wind> WindPtr;
 
 typedef std::pair<const int, const ignition::math::Quaterniond> SensorIdRot_P;
@@ -112,6 +114,7 @@ static const std::string kDefaultVisionTopic = "/vision_odom";
 static const std::string kDefaultMagTopic = "/mag";
 static const std::string kDefaultBarometerTopic = "/baro";
 static const std::string kDefaultWindTopic = "/world_wind";
+static const std::string kDefaultBatteryTopic = "/battery";
 static const std::string kDefaultGroundtruthTopic = "/groundtruth";
 
 //! OR operation for the enumeration and unsigned types that returns the bitmask
@@ -182,6 +185,7 @@ private:
   void VisionCallback(OdomPtr& odom_msg);
   void MagnetometerCallback(MagnetometerPtr& mag_msg);
   void BarometerCallback(BarometerPtr& baro_msg);
+  void BatteryCallback(BatteryPtr& msg);
   void WindVelocityCallback(WindPtr& msg);
   void SendSensorMessages();
   void SendGroundTruth();
@@ -229,8 +233,9 @@ private:
   transport::SubscriberPtr groundtruth_sub_{nullptr};
   transport::SubscriberPtr vision_sub_{nullptr};
   transport::SubscriberPtr mag_sub_{nullptr};
-  transport::SubscriberPtr baro_sub_{nullptr};
   transport::SubscriberPtr wind_sub_{nullptr};
+  transport::SubscriberPtr baro_sub_{nullptr};
+  transport::SubscriberPtr battery_sub_{nullptr};
 
   Sensor_M sensor_map_{}; // Map of sensor SubscriberPtr, IDs and orientations
 
@@ -241,6 +246,7 @@ private:
   std::string vision_sub_topic_{kDefaultVisionTopic};
   std::string mag_sub_topic_{kDefaultMagTopic};
   std::string baro_sub_topic_{kDefaultBarometerTopic};
+  std::string battery_sub_topic_{kDefaultBatteryTopic};
   std::string wind_sub_topic_{kDefaultWindTopic};
 
   std::mutex last_imu_message_mutex_ {};

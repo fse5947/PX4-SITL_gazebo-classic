@@ -212,6 +212,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   getSdfParam<std::string>(_sdf, "irlockSubTopic", irlock_sub_topic_, irlock_sub_topic_);
   getSdfParam<std::string>(_sdf, "magSubTopic", mag_sub_topic_, mag_sub_topic_);
   getSdfParam<std::string>(_sdf, "baroSubTopic", baro_sub_topic_, baro_sub_topic_);
+  getSdfParam<std::string>(_sdf, "batterySubTopic", battery_sub_topic_, battery_sub_topic_);
   getSdfParam<std::string>(_sdf, "groundtruthSubTopic", groundtruth_sub_topic_, groundtruth_sub_topic_);
 
   // set input_reference_ from inputs.control
@@ -425,6 +426,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   vision_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + vision_sub_topic_, &GazeboMavlinkInterface::VisionCallback, this);
   mag_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + mag_sub_topic_, &GazeboMavlinkInterface::MagnetometerCallback, this);
   baro_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + baro_sub_topic_, &GazeboMavlinkInterface::BarometerCallback, this);
+  battery_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + battery_sub_topic_, &GazeboMavlinkInterface::BatteryCallback, this);
   wind_sub_ = node_handle_->Subscribe("~/" + wind_sub_topic_, &GazeboMavlinkInterface::WindVelocityCallback, this);
 
   // Get the model joints
@@ -809,12 +811,6 @@ void GazeboMavlinkInterface::GpsCallback(GpsPtr& gps_msg, const int& id) {
   gps_data.id = id;
 
   mavlink_interface_->SendGpsMessages(gps_data);
-
-  SensorData::Battery battery_data;
-  battery_data.voltage = 16000;
-  battery_data.current = 400;
-  battery_data.id = 1;
-  mavlink_interface_->SendBatteryMessages(battery_data);
 }
 
 void GazeboMavlinkInterface::GroundtruthCallback(GtPtr& groundtruth_msg) {
@@ -1100,6 +1096,16 @@ void GazeboMavlinkInterface::BarometerCallback(BarometerPtr& baro_msg) {
   baro_data.abs_pressure = baro_msg->absolute_pressure();
   baro_data.pressure_alt = baro_msg->pressure_altitude();
   mavlink_interface_->UpdateBarometer(baro_data);
+}
+
+void GazeboMavlinkInterface::BatteryCallback(BatteryPtr& msg) {
+  SensorData::Battery battery_data;
+  battery_data.voltage = uint16_t(msg->voltage() * 1000);
+  battery_data.current = uint16_t(msg->current() * 100);
+  battery_data.remaining_pct =uint16_t(msg->remaining_pct());
+  battery_data.temperature =uint16_t(msg->temperature() * 100);
+  battery_data.id = 1;
+  mavlink_interface_->SendBatteryMessages(battery_data);
 }
 
 void GazeboMavlinkInterface::WindVelocityCallback(WindPtr& msg) {

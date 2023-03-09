@@ -287,9 +287,9 @@ void MavlinkInterface::SendBatteryMessages(const SensorData::Battery &data) {
   battery_status_msg.voltages[0] = data.voltage;
   battery_status_msg.voltages[1] = UINT16_MAX; /*< [mV] Battery voltage of cells 1 to 10 (see voltages_ext for cells 11-14). Cells in this field above the valid cell count for this battery should have the UINT16_MAX value. If individual cell voltages are unknown or not measured for this battery, then the overall battery voltage should be filled in cell 0, with all others set to UINT16_MAX. If the voltage of the battery is greater than (UINT16_MAX - 1), then cell 0 should be set to (UINT16_MAX - 1), and cell 1 to the remaining voltage. This can be extended to multiple cells if the total voltage is greater than 2 * (UINT16_MAX - 1).*/
   battery_status_msg.current_battery = data.current; /*< [cA] Battery current, -1: autopilot does not measure the current*/
-  battery_status_msg.battery_remaining = 50; /*< [%] Remaining battery energy. Values: [0-100], -1: autopilot does not estimate the remaining battery.*/
+  battery_status_msg.battery_remaining = data.remaining_pct; /*< [%] Remaining battery energy. Values: [0-100], -1: autopilot does not estimate the remaining battery.*/
   battery_status_msg.id = data.id;
-  battery_status_msg.temperature = 2000; /*< [cdegC] Temperature of the battery. INT16_MAX for unknown temperature.*/
+  battery_status_msg.temperature = data.temperature; /*< [cdegC] Temperature of the battery. INT16_MAX for unknown temperature.*/
   battery_status_msg.mode = 0; /*<  Battery mode. Default (0) is that battery mode reporting is not supported or battery is in normal-use mode.*/
 
   // battery_status_msg.energy_consumed; /*< [hJ] Consumed energy, -1: autopilot does not provide energy consumption estimate*/

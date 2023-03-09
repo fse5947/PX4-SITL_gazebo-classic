@@ -9,4 +9,5 @@ message Battery
   required float   remaining_capacity  = 4;
   required float   nominal_voltage  = 5;
   required float   nominal_capacity  = 6;
+  required float   temperature  = 7;
 }

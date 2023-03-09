@@ -129,6 +129,7 @@ void BatteryPlugin::OnUpdate(const common::UpdateInfo&)
     battery_msg_.set_remaining_capacity(current_capacity_);
     battery_msg_.set_nominal_voltage(nominal_voltage_);
     battery_msg_.set_nominal_capacity(nominal_capacity_);
+    battery_msg_.set_temperature(25.0);
 
     last_pub_time_ = current_time;
     // Publish battery msg
