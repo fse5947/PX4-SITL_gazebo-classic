@@ -1,0 +1,12 @@
+syntax = "proto2";
+package sensor_msgs.msgs;
+
+message Battery
+{
+  required float   voltage  = 1;
+  required float   current  = 2;
+  required int32   remaining_pct  = 3;
+  required float   remaining_capacity  = 4;
+  required float   nominal_voltage  = 5;
+  required float   nominal_capacity  = 6;
+}

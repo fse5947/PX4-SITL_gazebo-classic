@@ -377,6 +377,14 @@
       <pubRate>50</pubRate>
       <baroTopic>/baro</baroTopic>
     </plugin>
+    <plugin name='battery_plugin' filename='libgazebo_battery_plugin.so'>
+      <robotNamespace/>
+      <pubRate>50</pubRate>
+      <batteryTopic>/battery</batteryTopic>
+      <batteryCapacity>800</batteryCapacity>
+      <batteryNominalCapacity>1000</batteryNominalCapacity>
+      <nominalVoltage>16.9</nominalVoltage>
+    </plugin>
     <plugin name='mavlink_interface' filename='libgazebo_mavlink_interface.so'>
       <robotNamespace></robotNamespace>
       <imuSubTopic>/imu</imuSubTopic>

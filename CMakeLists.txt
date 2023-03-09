@@ -317,18 +317,20 @@ set(physics_msgs
     msgs/Force.proto
     msgs/Wind.proto
     )
-set(std_msgs msgs/Int32.proto)
+set(std_msgs
+  msgs/Int32.proto
+  msgs/Float.proto)
 set(sensor_msgs
   msgs/Airspeed.proto
   msgs/Imu.proto
   msgs/IRLock.proto
-  msgs/Float.proto
   msgs/Groundtruth.proto
   msgs/Range.proto
   msgs/SITLGps.proto
   msgs/OpticalFlow.proto
   msgs/MagneticField.proto
   msgs/Pressure.proto
+  msgs/Battery.proto
   )
 
 PROTOBUF_GENERATE_CPP(MAV_PROTO_SRCS MAV_PROTO_HDRS ${mav_msgs})
@@ -370,6 +372,7 @@ add_library(gazebo_multirotor_base_plugin SHARED src/gazebo_multirotor_base_plug
 add_library(gazebo_wind_plugin SHARED src/gazebo_wind_plugin.cpp)
 add_library(gazebo_magnetometer_plugin SHARED src/gazebo_magnetometer_plugin.cpp src/geo_mag_declination.cpp)
 add_library(gazebo_barometer_plugin SHARED src/gazebo_barometer_plugin.cpp)
+add_library(gazebo_battery_plugin SHARED src/gazebo_battery_plugin.cpp)
 add_library(gazebo_catapult_plugin SHARED src/gazebo_catapult_plugin.cpp)
 add_library(gazebo_usv_dynamics_plugin SHARED src/gazebo_usv_dynamics_plugin.cpp)
 add_library(gazebo_parachute_plugin SHARED src/gazebo_parachute_plugin.cpp)
@@ -397,6 +400,7 @@ set(plugins
   gazebo_wind_plugin
   gazebo_magnetometer_plugin
   gazebo_barometer_plugin
+  gazebo_battery_plugin
   gazebo_catapult_plugin
   gazebo_usv_dynamics_plugin
   gazebo_parachute_plugin
