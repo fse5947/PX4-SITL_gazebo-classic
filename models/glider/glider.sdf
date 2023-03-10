@@ -341,17 +341,16 @@
       <AeroAsym_FilePath>model://glider/aero_asym.csv</AeroAsym_FilePath>
     </plugin>
 
-    <plugin name='puller' filename='libgazebo_motor_model.so'>
+    <plugin name='puller' filename='libgazebo_motor_prop_model.so'>
       <robotNamespace></robotNamespace>
       <jointName>rotor_puller_joint</jointName>
       <linkName>rotor_puller</linkName>
       <turningDirection>cw</turningDirection>
       <timeConstantUp>0.0125</timeConstantUp>
       <timeConstantDown>0.025</timeConstantDown>
-      <maxRotVelocity>3500</maxRotVelocity>
+      <maxRotVelocity>1000</maxRotVelocity>
       <maxPower>700</maxPower>
-      <motorConstant>8.54858e-06</motorConstant>
-      <momentConstant>0.0</momentConstant>
+      <propFile>'Some'</propFile>
       <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
       <motorNumber>4</motorNumber>
       <rotorDragCoefficient>0.0</rotorDragCoefficient>
@@ -418,7 +417,7 @@
         <channel name="rotor4">
           <input_index>4</input_index>
           <input_offset>0</input_offset>
-          <input_scaling>3500</input_scaling>
+          <input_scaling>1000</input_scaling>
           <zero_position_disarmed>0</zero_position_disarmed>
           <zero_position_armed>0</zero_position_armed>
           <joint_control_type>velocity</joint_control_type>
