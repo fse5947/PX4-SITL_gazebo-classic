@@ -69,14 +69,32 @@ void GazeboMotorPropModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
     gzthrow("[gazebo_motor_prop_model] Couldn't find specified link \"" << link_name_ << "\".");
 
 
-  if (_sdf->HasElement("propFile")) {
-    prop_file_ = _sdf->GetElement("propFile")->Get<std::string>();
-    advancement_ratios_ = {0.085127, 0.100933, 0.116677, 0.131445, 0.149938, 0.166351, 0.181703, 0.197278, 0.213240, 0.228247, 0.245572, 0.259698, 0.275936, 0.291108, 0.307894};
-    thrust_coefficients_ = {0.095841, 0.095213, 0.093617, 0.092288, 0.090436, 0.089000, 0.086949, 0.085039, 0.082715, 0.081016, 0.078694, 0.076549, 0.074202, 0.071298, 0.069162};
-    power_coefficients_ = {0.033372, 0.033767, 0.033709, 0.033729, 0.033767, 0.033891, 0.033755, 0.033649, 0.033422, 0.033389, 0.033210, 0.032996, 0.032758, 0.032277, 0.032111};
+  if (_sdf->HasElement("maxJ")) {
+    max_j_ = _sdf->GetElement("maxJ")->Get<double>();
   } else {
-    gzthrow("[gazebo_motor_prop_model] Couldn't find specified prop file \"" << prop_file_ << "\".");
+    gzthrow("[gazebo_motor_prop_model] Missing maxJ.");
   }
+
+  // char buffer [20];
+  // for (int i=0; i<5; i++) {
+  //   sprintf (buffer, "thrustPolyCoef%d", i);
+  //   if (_sdf->HasElement(buffer)) {
+  //     thrust_coefficients_[0] = _sdf->GetElement((std::string)buffer)->Get<double>();
+  //   } else {
+  //     gzthrow("[gazebo_motor_prop_model] Missing"+(std::string)buffer);
+  //   }
+  // }
+
+  // if (_sdf->HasElement("powerPoly")) {
+  //   power_coefficients_ = _sdf->GetElement("powerPoly")->Get<ignition::math::Vector4d>();
+  // } else {
+  //   gzthrow("[gazebo_motor_prop_model] Missing powerPoly.");
+  // }
+
+  // if (thrust_coefficients_ != 4 || power_coefficients_!=4){
+  //   gzthrow("[gazebo_motor_prop_model] Incorrect size of coefficients vectors.");
+  // }
+
 
   if (_sdf->HasElement("motorNumber"))
     motor_number_ = _sdf->GetElement("motorNumber")->Get<int>();
@@ -161,36 +179,6 @@ void GazeboMotorPropModel::MotorFailureCallback(IntPtr &fail_msg) {
   motor_Failure_Number_ = fail_msg->data();
 }
 
-double GazeboMotorPropModel::InterpolatePropTable(double J, std::vector<double> coeff) {
-  double g;
-  int idx_high,idx_low;
-
-  //Find the index of the element of X that is nearest-above to x
-  auto i = lower_bound(advancement_ratios_.begin(), advancement_ratios_.end(), J);
-  idx_high = i - advancement_ratios_.begin(); //Nearest index
-  if (i == advancement_ratios_.end())
-    --idx_high;  // extrapolating above
-  else if (*i == J)
-    return coeff[idx_high];
-  else if (i == advancement_ratios_.begin()) {
-    // We don't want to extrapolate for J below what is in the table
-    // as it may cause weird behaviors
-    return coeff[0];
-  }
-
-  idx_low = idx_high - 1;
-
-  //Interpolation:
-  const double x_high= advancement_ratios_[idx_high];
-  const double x_low = advancement_ratios_[idx_low];
-  const double y_high = coeff[idx_high];
-  const double y_low = coeff[idx_low];
-
-  g = y_low+(J-x_low)*(y_high-y_low)/(x_high-x_low);
-
-  return g;
-}
-
 void GazeboMotorPropModel::UpdateForcesAndMoments() {
   motor_rot_vel_ = joint_->GetVelocity(0);
   if (motor_rot_vel_ / (2 * M_PI) > 1 / (2 * sampling_time_)) {
@@ -219,28 +207,33 @@ void GazeboMotorPropModel::UpdateForcesAndMoments() {
   double va = relative_wind_velocity.Length();
   double J = va / (motor_velocity_hz * propeller_diameter_);
 
-  double CT = InterpolatePropTable(J,thrust_coefficients_);
-  double CP = InterpolatePropTable(J,power_coefficients_);
+  J = std::min(max_j_, J);
+
+  double j[5] = {pow(J,4.0),pow(J,3.0),pow(J,2.0),J,1};
+
+  double CT = thrust_coefficients_[0]*j[0] + thrust_coefficients_[1]*j[1] + thrust_coefficients_[2]*j[2] + thrust_coefficients_[3]*j[3] + thrust_coefficients_[4]*j[4];
+  double CP = power_coefficients_[0]*j[0] + power_coefficients_[1]*j[1] + power_coefficients_[2]*j[2] + power_coefficients_[3]*j[3] + power_coefficients_[4]*j[4];
 
   double thrust = CT * rho * pow(motor_velocity_hz,2.0) * pow(propeller_diameter_,4.0);
-  power_ = CP * rho * pow(motor_velocity_hz,3.0) * pow(propeller_diameter_,5.0);
+  double propeller_power = CP * rho * pow(motor_velocity_hz,3.0) * pow(propeller_diameter_,5.0);
 
-  double torque = power_ / std::abs(real_motor_velocity);
+  double torque = propeller_power / std::abs(real_motor_velocity);
 
-  gzerr << "Motor hz :" << motor_velocity_hz << ' '
-   << "Va :" << va << ' '
-   << "J :" << J << ' '
-   << "CT :" << CT << ' '
-   << "CP :" << CP << ' '
-   << "T :" << thrust << ' '
-   << "P :" << power_ << ' '
-   << "Q :" << torque << '\n';
+  power_= propeller_power / efficiency_;
+
+  // gzerr << "Motor hz :" << motor_velocity_hz << ' '
+  //  << "Va :" << va << ' '
+  //  << "J :" << J << ' '
+  //  << "CT :" << CT << ' '
+  //  << "CP :" << CP << ' '
+  //  << "T :" << thrust << ' '
+  //  << "P :" << power_ << ' '
+  //  << "Q :" << torque << '\n';
 
   // Apply a force to the link.
   link_->AddRelativeForce(ignition::math::Vector3d(0, 0, thrust));
 
   return;
-
   // Getting the parent link, such that the resulting torques can be applied to it.
   physics::Link_V parent_links = link_->GetParentJointsLinks();
   // The transformation from the parent_link to the link_.
@@ -254,8 +247,8 @@ void GazeboMotorPropModel::UpdateForcesAndMoments() {
   ignition::math::Vector3d drag_torque_parent_frame = pose_difference.Rot().RotateVector(drag_torque);
   parent_links.at(0)->AddRelativeTorque(drag_torque_parent_frame);
 
-  return;
 
+#if 0
   //? Forces from Philppe Martin's and Erwan Salaün's
   //? 2010 IEEE Conference on Robotics and Automation paper
   //? The True Role of Accelerometer Feedback in Quadrotor Control
@@ -271,6 +264,7 @@ void GazeboMotorPropModel::UpdateForcesAndMoments() {
   //? - \omega * \mu_1 * V_A^{\perp}
   rolling_moment = -std::abs(real_motor_velocity) * turning_direction_ * rolling_moment_coefficient_ * velocity_perpendicular_to_rotor_axis;
   parent_links.at(0)->AddTorque(rolling_moment);
+#endif
 
 }
 

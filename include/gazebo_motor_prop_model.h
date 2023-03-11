@@ -52,7 +52,6 @@ static const std::string kDefaultCommandSubTopic = "/gazebo/command/motor_speed"
 static const std::string kDefaultMotorFailureNumSubTopic = "/gazebo/motor_failure_num";
 static const std::string kDefaultMotorVelocityPubTopic = "/motor_speed";
 static const std::string kDefaultMotorPowerPubTopic = "/motor_power";
-static const std::string kDefaultPropFile = "/prop";
 std::string wind_sub_topic_ = "/world_wind";
 
 typedef const boost::shared_ptr<const mav_msgs::msgs::CommandMotorSpeed> CommandMotorSpeedPtr;
@@ -85,7 +84,6 @@ class GazeboMotorPropModel : public MotorModel, public ModelPlugin {
         motor_failure_sub_topic_(kDefaultMotorFailureNumSubTopic),
         motor_speed_pub_topic_(kDefaultMotorVelocityPubTopic),
         motor_power_pub_topic_(kDefaultMotorPowerPubTopic),
-        prop_file_(kDefaultPropFile),
         motor_number_(0),
         motor_Failure_Number_(0),
         turning_direction_(turning_direction::CW),
@@ -99,9 +97,8 @@ class GazeboMotorPropModel : public MotorModel, public ModelPlugin {
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
         time_constant_down_(kDefaultTimeConstantDown),
         time_constant_up_(kDefaultTimeConstantUp),
-        advancement_ratios_{},
-        thrust_coefficients_{},
-        power_coefficients_{} {
+        efficiency_(kDefaultMotorEfficiency),
+        max_j_{1.0} {
   }
 
   virtual ~GazeboMotorPropModel();
@@ -125,7 +122,6 @@ class GazeboMotorPropModel : public MotorModel, public ModelPlugin {
   std::string motor_speed_pub_topic_;
   std::string motor_power_pub_topic_;
   std::string namespace_;
-  std::string prop_file_;
 
   int motor_number_;
   int turning_direction_;
@@ -138,9 +134,9 @@ class GazeboMotorPropModel : public MotorModel, public ModelPlugin {
   double max_rot_velocity_;
   double efficiency_;
 
-  std::vector<double> advancement_ratios_;
-  std::vector<double> thrust_coefficients_;
-  std::vector<double> power_coefficients_;
+  double max_j_;
+  double thrust_coefficients_[5] = {0.04806607,  0.12291199, -0.30300857, -0.01328176,  0.09464044};
+  double power_coefficients_[5] = {0.33019862, -0.50123572,  0.1440476,  -0.01009774,  0.03238984};
 
   double ref_motor_rot_vel_;
   double rolling_moment_coefficient_;
@@ -173,7 +169,6 @@ class GazeboMotorPropModel : public MotorModel, public ModelPlugin {
   void VelocityCallback(CommandMotorSpeedPtr &rot_velocities);
   void MotorFailureCallback(IntPtr &fail_msg);  /*!< Callback for the motor_failure_sub_ subscriber */
   void WindVelocityCallback(WindPtr &msg);
-  double InterpolatePropTable(double J, std::vector<double> coeff);
 
   std::unique_ptr<FirstOrderFilter<double>>  rotor_velocity_filter_;
 /*
