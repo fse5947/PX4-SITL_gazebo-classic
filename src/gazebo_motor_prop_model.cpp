@@ -233,7 +233,6 @@ void GazeboMotorPropModel::UpdateForcesAndMoments() {
   // Apply a force to the link.
   link_->AddRelativeForce(ignition::math::Vector3d(0, 0, thrust));
 
-  return;
   // Getting the parent link, such that the resulting torques can be applied to it.
   physics::Link_V parent_links = link_->GetParentJointsLinks();
   // The transformation from the parent_link to the link_.

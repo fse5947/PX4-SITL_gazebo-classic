@@ -348,7 +348,7 @@
       <turningDirection>cw</turningDirection>
       <timeConstantUp>0.0125</timeConstantUp>
       <timeConstantDown>0.025</timeConstantDown>
-      <maxRotVelocity>800</maxRotVelocity>
+      <maxRotVelocity>1500</maxRotVelocity>
       <maxJ>0.677661</maxJ>
       <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
       <motorNumber>4</motorNumber>
@@ -379,7 +379,7 @@
       <robotNamespace/>
       <pubRate>50</pubRate>
       <batteryTopic>/battery</batteryTopic>
-      <!--<capacity>800</capacity>-->
+      <!--<capacity>1500</capacity>-->
       <nominalCapacity>1000</nominalCapacity>
       <nominalVoltage>12.6</nominalVoltage>
     </plugin>
@@ -416,7 +416,7 @@
         <channel name="rotor4">
           <input_index>4</input_index>
           <input_offset>0</input_offset>
-          <input_scaling>800</input_scaling>
+          <input_scaling>1500</input_scaling>
           <zero_position_disarmed>0</zero_position_disarmed>
           <zero_position_armed>0</zero_position_armed>
           <joint_control_type>velocity</joint_control_type>
