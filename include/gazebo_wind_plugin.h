@@ -30,7 +30,7 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 
-#include "thermals/thermals.h"
+#include "thermals/thermal_manager.h"
 
 #include "Wind.pb.h"
 #include <Groundtruth.pb.h>
@@ -84,6 +84,7 @@ class GazeboWindPlugin : public WorldPlugin {
         world_longitude_(0.0),
         world_altitude_(0.0),
         position_(0.0,0.0,0.0),
+        thermal_manager_(0.0),
         node_handle_(NULL) {}
 
   virtual ~GazeboWindPlugin();
@@ -149,10 +150,11 @@ class GazeboWindPlugin : public WorldPlugin {
 
   ignition::math::Vector3d position_;
 
-  std::vector<boost::shared_ptr<Thermal>> thermals_;
   std::vector<double> thermal_strengths_;
   std::vector<double> thermal_radii_;
   std::vector<ignition::math::Vector3d> thermal_centers_;
+
+  ThermalManager thermal_manager_;
 
   bool in_thermal_{false};
   bool using_thermal_{false};

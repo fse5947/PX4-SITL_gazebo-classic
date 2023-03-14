@@ -26,6 +26,7 @@ public:
     virtual ~Thermal() {};
     virtual void UpdateTime(double &time) = 0;
     virtual bool inRange(ignition::math::Vector3d &position) = 0;
+    virtual bool ShouldSpawn(double &time) = 0;
     virtual bool isAlive() = 0;
     virtual ignition::math::Vector3d getWind(ignition::math::Vector3d &position) = 0;
 };
@@ -36,6 +37,7 @@ public:
     virtual ~ConstantThermal() {};
     virtual void UpdateTime(double &time);
     virtual bool inRange(ignition::math::Vector3d &position);
+    virtual bool ShouldSpawn(double &time);
     virtual bool isAlive();
     virtual ignition::math::Vector3d getWind(ignition::math::Vector3d &position);
 

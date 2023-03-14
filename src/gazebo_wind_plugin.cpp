@@ -169,8 +169,7 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
       thermal_strengths_.push_back(thermal_strength);
       thermal_radii_.push_back(thermal_radius);
 
-      boost::shared_ptr<Thermal> therm(new ConstantThermal(centerCoordinates_NED,thermal_strength,thermal_radius));
-      thermals_.push_back(therm);
+      thermal_manager_.addThermal(centerCoordinates_NED,thermal_strength,thermal_radius);
 
 			gzdbg << "Adding thermal at lat: "<< centerCoordinates_DEG.X()<<", lon: "<< centerCoordinates_DEG.Y() << "], NED: ["<< centerCoordinates_NED.X()<<","<< centerCoordinates_NED.Y() << "]\n";
 
@@ -236,6 +235,7 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
   }
 
   // Calculate wind from thermal updrafts
+  thermal_manager_.UpdateTime(now.Double());
 
   ignition::math::Vector3d wind_thermal(0, 0, 0); // Wind speed from thermal
 
@@ -265,10 +265,10 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
                     exp(-pow(thermal_dist/thermal_radii_.at(closest_thermal),2.0)) *
                     (1 - pow(thermal_dist/thermal_radii_.at(closest_thermal),2.0));
 
-    thermal_wind2 = thermals_.at(closest_thermal)->getWind(position_);
+    thermal_wind2 = thermal_manager_.getWind(position_);
 
     if (fabs(wind_thermal.Z() - thermal_wind2.Z()) >= 0.1)
-      gzerr << "Miss Matched";
+      gzerr << "Miss Matched.\n";
 
   if (!in_thermal_) {
       gzmsg << "Entered Thermal #"<< closest_thermal << "\n";

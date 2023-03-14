@@ -14,10 +14,15 @@ void ConstantThermal::UpdateTime(double &time)
 }
 bool ConstantThermal::inRange(ignition::math::Vector3d &position)
 {
-    return distance_from(position, center_) < 3;
+    return (distance_from(position, center_) < (3.0 * radius_));
 }
 bool ConstantThermal::isAlive()
 {
+    return true;
+}
+bool ConstantThermal::ShouldSpawn(double &time)
+{
+    std::cout << "Should spawn\n";
     return true;
 }
 ignition::math::Vector3d ConstantThermal::getWind(ignition::math::Vector3d &position)
