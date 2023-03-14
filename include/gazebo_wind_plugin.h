@@ -30,6 +30,8 @@
 #include <gazebo/gazebo.hh>
 #include <gazebo/physics/physics.hh>
 
+#include "thermals/thermals.h"
+
 #include "Wind.pb.h"
 #include <Groundtruth.pb.h>
 
@@ -75,6 +77,13 @@ class GazeboWindPlugin : public WorldPlugin {
         wind_gust_direction_variance_(kDefaultWindGustDirectionVariance),
         frame_id_(kDefaultFrameId),
         pub_interval_(0.5),
+        lat_home_(kDefaultHomeLatitude),
+        lon_home_(kDefaultHomeLongitude),
+        alt_home_(kDefaultHomeAltitude),
+        world_latitude_(0.0),
+        world_longitude_(0.0),
+        world_altitude_(0.0),
+        position_(0.0,0.0,0.0),
         node_handle_(NULL) {}
 
   virtual ~GazeboWindPlugin();
@@ -101,6 +110,13 @@ class GazeboWindPlugin : public WorldPlugin {
   std::string wind_pub_topic_;
 
   void GroundtruthCallback(GtPtr& groundtruth_msg);
+
+  double lat_home_;
+  double lon_home_;
+  double alt_home_;
+  double world_latitude_;
+  double world_longitude_;
+  double world_altitude_;
 
   double wind_velocity_mean_;
   double wind_velocity_max_;
@@ -131,16 +147,13 @@ class GazeboWindPlugin : public WorldPlugin {
   common::Time wind_gust_start_;
   common::Time last_time_;
 
-  double groundtruth_lat_rad_{0.0};
-  double groundtruth_lon_rad_{0.0};
-  double groundtruth_altitude_{0.0};
-  double gps_x{0.0};
-  double gps_y{0.0};
+  ignition::math::Vector3d position_;
 
+  std::vector<boost::shared_ptr<Thermal>> thermals_;
   std::vector<double> thermal_strengths_;
   std::vector<double> thermal_radii_;
   std::vector<ignition::math::Vector3d> thermal_centers_;
-  
+
   bool in_thermal_{false};
   bool using_thermal_{false};
 

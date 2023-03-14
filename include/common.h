@@ -285,6 +285,29 @@ inline std::pair<double, double> reproject(ignition::math::Vector3d& pos,
   return std::make_pair (lat_rad, lon_rad);
 }
 
+inline ignition::math::Vector3d project(double& lat_rad, double& lon_rad, double& alt, double& lat_home, double& lon_home)
+{
+			const double sin_lat = sin(lat_rad);
+			const double cos_lat = cos(lat_rad);
+			const double ref_sin_lat = sin(lat_home);
+			const double ref_cos_lat = cos(lat_home);
+			const double cos_d_lon = cos(lon_rad - lon_home);
+			const double arg = fmin(fmax(ref_sin_lat * sin_lat + ref_cos_lat * cos_lat * cos_d_lon, -1.0),  1.0);
+			const double c = acos(arg);
+			double k = 1.0;
+
+			if (abs(c) > 0) {
+				k = (c / sin(c));
+			}
+
+			double x = static_cast<double>(k * (ref_cos_lat * sin_lat - ref_sin_lat * cos_lat * cos_d_lon) * earth_radius);
+			double y = static_cast<double>(k * cos_lat * sin(lon_rad - lon_home) * earth_radius);
+
+      // NED
+      return ignition::math::Vector3d(x, y , -alt);
+
+}
+
 /**
  * @brief Check if the world spherical coordinates are set and set them
  * @param[in] world ptr to the world
