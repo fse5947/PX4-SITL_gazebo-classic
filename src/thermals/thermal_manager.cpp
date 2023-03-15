@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool IsDead(boost::shared_ptr<Thermal> thermal) { return !thermal->isAlive(); }
+bool IsDead(boost::shared_ptr<Thermal> thermal) { return thermal->isOver(); }
 
 
 void ThermalManager::UpdateTime(double time) {
@@ -23,8 +23,12 @@ void ThermalManager::addThermal(ignition::math::Vector3d &center, double &streng
     }
 }
 
-void ThermalManager::addThermal(ignition::math::Vector3d &center, double &strength, double &radius, double &spawn_time) {
+void ThermalManager::addThermal(ignition::math::Vector3d &center, double &radius, double &max_strength, double &spawn_time, double &rise_time_factor, double &period) {
+    thermals_.push_back(boost::shared_ptr<Thermal>(new DynamicThermal(center, radius, max_strength, spawn_time, rise_time_factor, period)));
 
+    if (thermals_.size() == 1) {
+        next_to_spawn_ = thermals_.begin();
+    }
 }
 
 ignition::math::Vector3d ThermalManager::getWind(ignition::math::Vector3d &position){

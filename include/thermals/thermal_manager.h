@@ -21,7 +21,7 @@ public:
     virtual ~ThermalManager() {};
     virtual void UpdateTime(double time);
     virtual void addThermal(ignition::math::Vector3d &center, double &strength, double &radius);
-    virtual void addThermal(ignition::math::Vector3d &center, double &strength, double &radius, double &spawn_time);
+    virtual void addThermal(ignition::math::Vector3d &center, double &radius, double &max_strength, double &spawn_time, double &rise_time_factor, double &period);
     virtual ignition::math::Vector3d getWind(ignition::math::Vector3d &position);
 
 private:
