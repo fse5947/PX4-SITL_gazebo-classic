@@ -149,15 +149,7 @@ class GazeboWindPlugin : public WorldPlugin {
   common::Time last_time_;
 
   ignition::math::Vector3d position_;
-
-  std::vector<double> thermal_strengths_;
-  std::vector<double> thermal_radii_;
-  std::vector<ignition::math::Vector3d> thermal_centers_;
-
   ThermalManager thermal_manager_;
-
-  bool in_thermal_{false};
-  bool using_thermal_{false};
 
   transport::NodePtr node_handle_;
   transport::PublisherPtr wind_pub_;

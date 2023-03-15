@@ -136,8 +136,6 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
 
 		while( thermal != nullptr && thermal->HasElement("centerCoordinates")) {
 
-			using_thermal_ = true;
-
       ignition::math::Vector3d centerCoordinates_DEG;
       if (thermal->HasElement("centerCoordinates")) {
         centerCoordinates_DEG = thermal->GetElement("centerCoordinates")->Get<ignition::math::Vector3d>();
@@ -165,10 +163,6 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
       auto lon_rad = centerCoordinates_DEG.Y() / 180.0 * M_PI;
 			ignition::math::Vector3d centerCoordinates_NED = project(lat_rad, lon_rad, alt, lat_home_, lon_home_);
 
-			thermal_centers_.push_back(centerCoordinates_NED);
-      thermal_strengths_.push_back(thermal_strength);
-      thermal_radii_.push_back(thermal_radius);
-
       thermal_manager_.addThermal(centerCoordinates_NED,thermal_strength,thermal_radius);
 
 			gzdbg << "Adding thermal at lat: "<< centerCoordinates_DEG.X()<<", lon: "<< centerCoordinates_DEG.Y() << "], NED: ["<< centerCoordinates_NED.X()<<","<< centerCoordinates_NED.Y() << "]\n";
@@ -178,7 +172,6 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
 
 	} else {
 		gzdbg << "[gazebo_wind_plugin] No Thermals.\n";
-		using_thermal_ = false;
 	}
 
   // Listen to the update event. This event is broadcast every
@@ -237,50 +230,7 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Calculate wind from thermal updrafts
   thermal_manager_.UpdateTime(now.Double());
 
-  ignition::math::Vector3d wind_thermal(0, 0, 0); // Wind speed from thermal
-
-  // Distances from thermal
-	double thermal_dist = -1.0;
-
-	int closest_thermal = -1;
-	for (int i = 0; i < thermal_centers_.size(); i++) {
-		ignition::math::Vector3d thermal_center = thermal_centers_.at(i);
-
-    auto distance = (thermal_center - position_);
-    distance.Z() = 0.0;
-		double current_thermal_dist = distance.Length();
-
-		if (i == 0 || thermal_dist > current_thermal_dist) {
-			closest_thermal = i;
-			thermal_dist = current_thermal_dist;
-
-		}
-	}
-
-  std::cout << "Distance from thermal: " << thermal_dist << std::endl;
-
-  auto thermal_wind2 = ignition::math::Vector3d(0.0,0.0,0.0);
-  if (thermal_dist < 3 * thermal_radii_.at(closest_thermal)) {
-    wind_thermal.Z() = thermal_strengths_.at(closest_thermal) *
-                    exp(-pow(thermal_dist/thermal_radii_.at(closest_thermal),2.0)) *
-                    (1 - pow(thermal_dist/thermal_radii_.at(closest_thermal),2.0));
-
-    thermal_wind2 = thermal_manager_.getWind(position_);
-
-    if (fabs(wind_thermal.Z() - thermal_wind2.Z()) >= 0.1)
-      gzerr << "Miss Matched.\n";
-
-  if (!in_thermal_) {
-      gzmsg << "Entered Thermal #"<< closest_thermal << "\n";
-      in_thermal_ = true;
-    }
-
-  } else if (in_thermal_) {
-    gzmsg << "Left Thermal\n";
-    in_thermal_ = false;
-  }
-
-  std::cout << wind_thermal.Z()<< " " << thermal_wind2.Z() << std::endl;
+  auto wind_thermal = thermal_manager_.getWind(position_);
 
   gazebo::msgs::Vector3d* wind_v = new gazebo::msgs::Vector3d();
   wind_v->set_x(wind.X() + wind_gust.X());

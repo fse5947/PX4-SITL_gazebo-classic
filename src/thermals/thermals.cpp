@@ -30,11 +30,13 @@ ignition::math::Vector3d ConstantThermal::getWind(ignition::math::Vector3d &posi
 
     double distance_from_center = distance_from(position, center_);
 
-    std::cout << "dist " << distance_from_center << " radius " << radius_ << '\n';
-
     double dist_ratio = pow(distance_from_center / radius_, 2.0);
 
-    return ignition::math::Vector3d(0.0, 0.0, strength_ * exp(-dist_ratio) * (1 - dist_ratio));
+    double wind_u = strength_ * exp(-dist_ratio) * (1 - dist_ratio);
+
+    std::cout << "Distance: " << distance_from_center << " Wind Up: " << wind_u << '\n';
+
+    return ignition::math::Vector3d(0.0, 0.0, wind_u);
 }
 
 DynamicThermal::DynamicThermal(ignition::math::Vector3d &center, double &radius, double &max_strength, double &spawn_time, double &rise_time_factor, double &period): ConstantThermal(center,max_strength,radius),
