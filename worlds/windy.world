@@ -27,14 +27,16 @@
       <windGustVelocityVariance>0</windGustVelocityVariance>
       <windGustDirectionMean>1 0 0</windGustDirectionMean>
       <windGustDirectionVariance>0</windGustDirectionVariance>
-      <!-- Thermal Updraft-->
+      <!-- Thermal Updraft
       <Thermals>
         <Thermal_1>
       		<centerCoordinates>51.4876 -2.15056 0</centerCoordinates>
           <ThermalStrength>5.0</ThermalStrength>
           <ThermalRadius>150.0</ThermalRadius>
 				</Thermal_1>
-      </Thermals>
+      </Thermals>-->
+      <keepThermalNED>0</keepThermalNED>
+      <thermalFile>model://thermals/3.00h_0.100_wind_env0_instance.json</thermalFile>
       <windPubTopic>world_wind</windPubTopic>
     </plugin>
     <physics name='default_physics' default='0' type='ode'>

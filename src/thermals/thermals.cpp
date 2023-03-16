@@ -34,19 +34,19 @@ ignition::math::Vector3d ConstantThermal::getWind(ignition::math::Vector3d &posi
 
     double wind_u = strength_ * exp(-dist_ratio) * (1 - dist_ratio);
 
-    std::cout << "Distance: " << distance_from_center << " Wind Up: " << wind_u << '\n';
+    //std::cout << "Distance: " << distance_from_center << " Wind Up: " << wind_u << '\n';
 
     return ignition::math::Vector3d(0.0, 0.0, wind_u);
 }
 
-DynamicThermal::DynamicThermal(ignition::math::Vector3d &center, double &radius, double &max_strength, double &spawn_time, double &rise_time_factor, double &period): ConstantThermal(center,max_strength,radius),
+DynamicThermal::DynamicThermal(ignition::math::Vector3d &center, double &radius, double &max_strength, double &spawn_time, double &rise_time_factor, double &active_period): ConstantThermal(center,max_strength,radius),
                                                                                                                                                                max_strength_{max_strength},
                                                                                                                                                                spawn_time_{spawn_time},
                                                                                                                                                                rise_time_factor_{rise_time_factor},
-                                                                                                                                                               period_{period}
+                                                                                                                                                               active_period_{active_period}
 {
     double threshold = 0.01;
-    duration_ = (((log((1.0 / threshold) - 1)) / rise_time_factor_) + (0.5 * period_)) * 2.0;
+    duration_ = (((log((1.0 / threshold) - 1)) / rise_time_factor_) + (0.5 * active_period_)) * 2.0;
 }
 
 void DynamicThermal::UpdateTime(double &time)
@@ -59,8 +59,8 @@ ignition::math::Vector3d DynamicThermal::getWind(ignition::math::Vector3d &posit
     if (lifetime_ < 0.0)
         return ignition::math::Vector3d(0.0, 0.0, 0.0);
 
-    auto decay_exp = 1.0 / (exp(rise_time_factor_ * (lifetime_ - 0.5 * (duration_ + period_))) + 1.0);
-    auto raise_exp = 1.0 / (exp(rise_time_factor_ * (0.5 * (duration_ - period_) - lifetime_)) + 1.0);
+    auto decay_exp = 1.0 / (exp(rise_time_factor_ * (lifetime_ - 0.5 * (duration_ + active_period_))) + 1.0);
+    auto raise_exp = 1.0 / (exp(rise_time_factor_ * (0.5 * (duration_ - active_period_) - lifetime_)) + 1.0);
     strength_ = (decay_exp + raise_exp - 1.0) * max_strength_;
 
     return ConstantThermal::getWind(position);

@@ -52,7 +52,7 @@ protected:
 class DynamicThermal : public ConstantThermal
 {
 public:
-    DynamicThermal(ignition::math::Vector3d &center, double &radius, double &max_strength, double &spawn_time, double &rise_time, double &period);
+    DynamicThermal(ignition::math::Vector3d &center, double &radius, double &max_strength, double &spawn_time, double &rise_time, double &active_period);
     virtual ~DynamicThermal(){};
     virtual void UpdateTime(double &time);
     virtual bool ShouldSpawn(double &time);
@@ -63,7 +63,7 @@ private:
     double max_strength_{0.0};
     double spawn_time_{0.0};
     double rise_time_factor_{0.0};
-    double period_{0.0};
+    double active_period_{0.0};
 
     double duration_{0.0};
     double lifetime_{0.0};

@@ -23,6 +23,8 @@
 #include "common.h"
 
 #include <iostream>
+#include <fstream>
+#include <jsoncpp/json/json.h>
 
 namespace gazebo {
 
@@ -95,7 +97,7 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
 
   if (env_lat) {
     lat_home_ = std::stod(env_lat) * M_PI / 180.0;
-    gzmsg << "[gazebo_wind_plugin] Home latitude is set to " << std::stod(env_lat) << ".\n";
+    gzmsg << "[gazebo_wind_plugin] Home latitude is set to " << std::stod(env_lat) << " (" << lat_home_ << ").\n";
   } else if (world_has_origin) {
     lat_home_ = world_latitude_;
     gzmsg << "[gazebo_wind_plugin] Home latitude is set to " << lat_home_ << ".\n";
@@ -107,7 +109,7 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
 
   if (env_lon) {
     lon_home_ = std::stod(env_lon) * M_PI / 180.0;
-    gzmsg << "[gazebo_wind_plugin] Home longitude is set to " << std::stod(env_lon) << ".\n";
+    gzmsg << "[gazebo_wind_plugin] Home longitude is set to " << std::stod(env_lon) << " (" << lon_home_ << ").\n";
   } else if (world_has_origin) {
     lon_home_ = world_longitude_;
     gzmsg << "[gazebo_wind_plugin] Home longitude is set to " << lon_home_ << ".\n";
@@ -127,7 +129,7 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
     getSdfParam<double>(sdf, "homeAltitude", alt_home_, alt_home_);
   }
 
-  // Get thermal updraft params from SDF
+  //* Get thermal updraft params from SDF
   if (sdf->HasElement("Thermals")) {
 		sdf::ElementPtr thermals = sdf->GetElement("Thermals");
 		sdf::ElementPtr thermal = thermals->GetFirstElement();
@@ -170,9 +172,82 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
 			thermal = thermal->GetNextElement();
 		}
 
-	} else {
-		gzdbg << "[gazebo_wind_plugin] No Thermals.\n";
 	}
+
+  //* Get Thermal from file
+  if (sdf->HasElement("thermalFile")) {
+    std::string thermal_file;
+
+    thermal_file =  sdf::findFile(sdf->GetElement("thermalFile")->Get<std::string>());
+    gzmsg << "Reading Thermal from: " << thermal_file << '\n';
+
+    std::ifstream file(thermal_file);
+    Json::Reader reader;
+    Json::Value thermal_data;
+    reader.parse(file, thermal_data);
+    gzmsg << "File has " << thermal_data["nbr_thermals"].asInt() << " thermals" << '\n';
+
+    bool keep_ned{true};
+    if (sdf->HasElement("keepThermalNED")) {
+     keep_ned = sdf->GetElement("keepThermalNED")->Get<bool>();
+    }
+
+    double ref_lat{0.0}, ref_lon{0.0}, ref_alt{0.0};
+    if (!keep_ned) {
+      if (thermal_data.isMember("ref_lla")) {
+        auto ref_lla = thermal_data["ref_lla"];
+        ref_lat = ref_lla["lat"].asDouble();
+        ref_lon = ref_lla["lon"].asDouble();
+        ref_alt = ref_lla["alt"].asDouble();
+        gzdbg << "Thermal ref Lat Lon [" << ref_lat << ", " << ref_lon << ", " << ref_alt << "]\n";
+      } else {
+        gzerr << "Missing reference coordinate for reprojection of thermals.\n";
+      }
+    } else {
+      gzwarn << "Using thermal NED coordination base on home position\n";
+    }
+
+    if (!thermal_data.isMember("thermals"))
+      gzthrow("No thermals found in file.");
+
+    auto thermals = thermal_data["thermals"];
+
+    for (int i = 0; i < thermals.size(); i++){
+      auto thermal = thermals[i];
+      if (!thermal.isMember("n") || !thermal.isMember("e") || !thermal.isMember("d"))
+        gzthrow("Thermal missing coordinate");
+      if (!thermal.isMember("spawn_time"))
+        gzthrow("Thermal missing spawn time");
+      if (!thermal.isMember("eta"))
+        gzthrow("Thermal missing rise time factor");
+      if (!thermal.isMember("active_period"))
+        gzthrow("Thermal missing active_period");
+      if (!thermal.isMember("radius"))
+        gzthrow("Thermal missing radius");
+      if (!thermal.isMember("max_strength"))
+        gzthrow("Thermal missing max strength");
+      auto centerCoordinates_NED = ignition::math::Vector3d(thermal["n"].asDouble(), thermal["e"].asDouble(), thermal["d"].asDouble());
+
+      if (!keep_ned) {
+        //gzdbg << "NED: ["<< centerCoordinates_NED.X()<<","<< centerCoordinates_NED.Y() << "]\n";
+        auto centerCoordinates_ENU = q_ENU_to_NED.Inverse().RotateVector(centerCoordinates_NED);
+        //gzdbg << "ENU: ["<< centerCoordinates_ENU.X()<<","<< centerCoordinates_ENU.Y() << "]\n";
+        auto lat_lon = reproject(centerCoordinates_ENU,ref_lat,ref_lon,ref_alt);
+        //gzdbg << "Thermal Lat Lon : [" << lat_lon.first << ", "<<  lat_lon.second << "]\n";
+        centerCoordinates_NED = project(lat_lon.first, lat_lon.second,ref_alt,lat_home_, lon_home_);
+      }
+
+      double radius = thermal["radius"].asDouble();
+      double max_strength = thermal["max_strength"].asDouble();
+      double spawn_time = thermal["spawn_time"].asDouble();
+      double rise_time_factor = thermal["eta"].asDouble();
+      double active_period = thermal["active_period"].asDouble();
+      //gzdbg << "Adding thermal at NED: ["<< centerCoordinates_NED.X()<<","<< centerCoordinates_NED.Y() << "]\n";
+
+      thermal_manager_.addThermal(centerCoordinates_NED,radius,max_strength,spawn_time,rise_time_factor,active_period);
+    }
+
+  }
 
   // Listen to the update event. This event is broadcast every
   // simulation iteration.
