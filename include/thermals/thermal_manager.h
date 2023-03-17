@@ -20,6 +20,7 @@ public:
     ThermalManager(double env_sink): env_sink_(env_sink) {};
     virtual ~ThermalManager() {};
     virtual void UpdateTime(double time);
+    virtual void setEnvSink(double value) {env_sink_ = value;};
     virtual void addThermal(ignition::math::Vector3d &center, double &strength, double &radius);
     virtual void addThermal(ignition::math::Vector3d &center, double &radius, double &max_strength, double &spawn_time, double &rise_time_factor, double &active_period);
     virtual ignition::math::Vector3d getWind(ignition::math::Vector3d &position);

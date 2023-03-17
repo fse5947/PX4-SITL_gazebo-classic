@@ -207,10 +207,18 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
       gzwarn << "Using thermal NED coordination base on home position\n";
     }
 
+    if (thermal_data.isMember("env_sink")) {
+      auto env_sink = thermal_data["env_sink"].asDouble();
+      thermal_manager_.setEnvSink(env_sink);
+      gzdbg << "Env sink: " << env_sink << '\n';
+    }
+
     if (!thermal_data.isMember("thermals"))
       gzthrow("No thermals found in file.");
 
     auto thermals = thermal_data["thermals"];
+
+
 
     for (int i = 0; i < thermals.size(); i++){
       auto thermal = thermals[i];
