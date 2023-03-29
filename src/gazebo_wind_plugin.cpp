@@ -163,7 +163,7 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
       double alt{0.0};
       auto lat_rad = centerCoordinates_DEG.X()  / 180.0 * M_PI;
       auto lon_rad = centerCoordinates_DEG.Y() / 180.0 * M_PI;
-			ignition::math::Vector3d centerCoordinates_NED = project(lat_rad, lon_rad, alt, lat_home_, lon_home_);
+			ignition::math::Vector3d centerCoordinates_NED = project(lat_rad, lon_rad, alt, lat_home_, lon_home_, alt_home_);
 
       thermal_manager_.addThermal(centerCoordinates_NED,thermal_strength,thermal_radius);
 
@@ -181,6 +181,7 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
     thermal_file =  sdf::findFile(sdf->GetElement("thermalFile")->Get<std::string>());
     gzmsg << "Reading Thermal from: " << thermal_file << '\n';
 
+    //! Check if file is missing
     std::ifstream file(thermal_file);
     Json::Reader reader;
     Json::Value thermal_data;
@@ -242,7 +243,7 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
         //gzdbg << "ENU: ["<< centerCoordinates_ENU.X()<<","<< centerCoordinates_ENU.Y() << "]\n";
         auto lat_lon = reproject(centerCoordinates_ENU,ref_lat,ref_lon,ref_alt);
         //gzdbg << "Thermal Lat Lon : [" << lat_lon.first << ", "<<  lat_lon.second << "]\n";
-        centerCoordinates_NED = project(lat_lon.first, lat_lon.second,ref_alt,lat_home_, lon_home_);
+        centerCoordinates_NED = project(lat_lon.first, lat_lon.second,ref_alt,lat_home_, lon_home_, alt_home_);
       }
 
       double radius = thermal["radius"].asDouble();
@@ -334,7 +335,7 @@ void GazeboWindPlugin::GroundtruthCallback(GtPtr& groundtruth_msg) {
   auto lon_rad = groundtruth_msg->longitude_rad();
   auto alt_rad = groundtruth_msg->altitude();
 
-  position_ = project(lat_rad, lon_rad, alt_rad, lat_home_, lon_home_);
+  position_ = project(lat_rad, lon_rad, alt_rad, lat_home_, lon_home_, alt_home_);
 }
 
 }

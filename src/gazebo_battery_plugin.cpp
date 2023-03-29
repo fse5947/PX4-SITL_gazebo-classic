@@ -67,7 +67,7 @@ void BatteryPlugin::getSdfParams(sdf::ElementPtr sdf)
   getSdfParam<double>(sdf,"capacity",current_capacity_,nominal_capacity_,true);
   current_capacity_ = std::min(current_capacity_,nominal_capacity_);
   getSdfParam<double>(sdf,"nominalVoltage",nominal_voltage_,nominal_voltage_,true);
-  getSdfParam<double>(sdf,"efficiency_",efficiency_,efficiency_,true);
+  getSdfParam<double>(sdf,"efficiency",efficiency_,efficiency_,true);
 }
 
 void BatteryPlugin::Load(physics::ModelPtr model, sdf::ElementPtr sdf)

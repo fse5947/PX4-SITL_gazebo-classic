@@ -64,7 +64,7 @@ namespace gazebo {
   static const std::string DEFAULT_MOTOR_POWER_TOPIC = "/motor_power";
 
   static constexpr unsigned int DEFAULT_PUB_RATE = 50;  // [Hz].
-  static constexpr double DEFAULT_NOMINAL_CAPACITY = 100.0; // [mWh]
+  static constexpr double DEFAULT_NOMINAL_CAPACITY = 100.0; // [Wh]
   static constexpr double DEFAULT_NOMINAL_VOLTAGE = 16.8; // [V]
   static constexpr double DEFAULT_EFFICIENCY = 0.9; //
 

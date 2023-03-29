@@ -36,7 +36,9 @@ void ThermalManager::addThermal(ignition::math::Vector3d &center, double &radius
 }
 
 ignition::math::Vector3d ThermalManager::getWind(ignition::math::Vector3d &position){
-    auto wind = ignition::math::Vector3d(0.0,0.0,env_sink_);
+
+
+    auto wind = ignition::math::Vector3d(0.0,0.0,-env_sink_);
 
     bool in_thermal = false;
     for (auto& thermal : active_thermals_){
@@ -52,7 +54,12 @@ ignition::math::Vector3d ThermalManager::getWind(ignition::math::Vector3d &posit
         gzmsg << "Left Thermal!\n";
     }
     in_thermal_ = in_thermal;
-    return wind;
+
+    //? Automatic takeoff is very sensitive to "down wind". So we assume the ground is at
+    //? NED.z=0 and we gradually apply env sink up to 30 meters
+    auto ground_scaling = max(min(position.Z()/-30.0,1.0),0.0);
+
+    return wind * ground_scaling;
 }
 
 void ThermalManager::SpawnThermals(double &time){

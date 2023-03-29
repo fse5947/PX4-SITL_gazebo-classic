@@ -285,7 +285,7 @@ inline std::pair<double, double> reproject(ignition::math::Vector3d& pos,
   return std::make_pair (lat_rad, lon_rad);
 }
 
-inline ignition::math::Vector3d project(double& lat_rad, double& lon_rad, double& alt, double& lat_home, double& lon_home)
+inline ignition::math::Vector3d project(double& lat_rad, double& lon_rad, double& alt, double& lat_home, double& lon_home, double& alt_home)
 {
 			const double sin_lat = sin(lat_rad);
 			const double cos_lat = cos(lat_rad);
@@ -304,7 +304,7 @@ inline ignition::math::Vector3d project(double& lat_rad, double& lon_rad, double
 			double y = static_cast<double>(k * cos_lat * sin(lon_rad - lon_home) * earth_radius);
 
       // NED
-      return ignition::math::Vector3d(x, y , -alt);
+      return ignition::math::Vector3d(x, y , alt_home-alt);
 
 }
 

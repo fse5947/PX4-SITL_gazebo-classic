@@ -1,0 +1,13 @@
+{
+    "version":0.1,
+    "init_time":0,
+    "end_time":23643.36348092496,
+    "env_sink":1.0,
+    "ref_lla":{
+        "lat":0.7904442069709366,
+        "lon":-1.295584258227096,
+        "alt":0.0
+    },
+    "nbr_thermals":0,
+    "thermals":[]
+}
