@@ -308,6 +308,22 @@ void MavlinkInterface::SendBatteryMessages(const SensorData::Battery &data) {
   }
 }
 
+void MavlinkInterface::SendWindGroundTruthMessages(const SensorData::Wind &data) {
+  // fill HIL GPS Mavlink msg
+  mavlink_wind_cov_t wind_msg;
+
+  wind_msg.wind_x = data.north;
+  wind_msg.wind_y = data.east;
+  wind_msg.wind_z = data.down;
+
+  // send HIL_GPS Mavlink msg
+  if (!hil_mode_ || (hil_mode_ && !hil_state_level_)) {
+    mavlink_message_t msg;
+    mavlink_msg_wind_cov_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &wind_msg);
+    send_mavlink_message(&msg);
+  }
+}
+
 void MavlinkInterface::SendGpsMessages(const SensorData::Gps &data) {
   // fill HIL GPS Mavlink msg
   mavlink_hil_gps_t hil_gps_msg;

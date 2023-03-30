@@ -132,6 +132,14 @@ namespace SensorData {
         int id;
     };
 
+
+    struct Wind
+    {
+        double north;
+        double east;
+        double down;
+    };
+
 }
 
 struct HILData {
@@ -164,6 +172,7 @@ public:
     void Load();
     void SendHeartbeat();
     void SendBatteryMessages(const SensorData::Battery &data);
+    void SendWindGroundTruthMessages(const SensorData::Wind &data);
     void SendSensorMessages(const uint64_t time_usec);
     void SendSensorMessages(const uint64_t time_usec, HILData &hil_data);
     void SendGpsMessages(const SensorData::Gps &data);

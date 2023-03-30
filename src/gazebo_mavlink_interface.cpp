@@ -1112,6 +1112,13 @@ void GazeboMavlinkInterface::WindVelocityCallback(WindPtr& msg) {
   wind_vel_ = ignition::math::Vector3d(msg->velocity().x(),
             msg->velocity().y(),
             msg->velocity().z());
+  SensorData::Wind wind;
+
+  wind.north = msg->velocity().y();
+  wind.east = msg->velocity().x();
+  wind.down = -msg->velocity().z();
+
+  mavlink_interface_->SendWindGroundTruthMessages(wind);
 }
 
 void GazeboMavlinkInterface::handle_actuator_controls() {
