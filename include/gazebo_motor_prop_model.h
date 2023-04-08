@@ -18,8 +18,8 @@
  * limitations under the License.
  */
 
-#ifndef _GAZEBO_MOTOR_MODEL_HH_
-#define _GAZEBO_MOTOR_MODEL_HH_
+#ifndef _GAZEBO_MOTOR_PROP_MODEL_HH_
+#define _GAZEBO_MOTOR_PROP_MODEL_HH_
 
 #include <stdio.h>
 
@@ -55,6 +55,7 @@ static const std::string kDefaultMotorPowerPubTopic = "/motor_power";
 std::string wind_sub_topic_ = "/world_wind";
 
 typedef const boost::shared_ptr<const mav_msgs::msgs::CommandMotorSpeed> CommandMotorSpeedPtr;
+typedef const boost::shared_ptr<const msgs::Int> IntPtr;
 typedef const boost::shared_ptr<const physics_msgs::msgs::Wind> WindPtr;
 
 /*
@@ -63,21 +64,20 @@ typedef const boost::shared_ptr<const mav_msgs::msgs::MotorSpeed> MotorSpeedPtr;
 static const std::string kDefaultMotorTestSubTopic = "motors";
 */
 
-// Set the max_force_ to the max double value. The limitations get handled by the FirstOrderFilter.
-static constexpr double kDefaultMaxForce = std::numeric_limits<double>::max();
-static constexpr double kDefaultMotorConstant = 8.54858e-06;
-static constexpr double kDefaultMomentConstant = 0.016;
 static constexpr double kDefaultTimeConstantUp = 1.0 / 80.0;
 static constexpr double kDefaultTimeConstantDown = 1.0 / 40.0;
-static constexpr double kDefaulMaxRotVelocity = 838.0;
+static constexpr double kDefaultMaxRotVelocity = 838.0;
 static constexpr double kDefaultRotorDragCoefficient = 1.0e-4;
 static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
 static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
 static constexpr double kDefaultMotorEfficiency = 0.9;
+static constexpr double kDefaultPropellerDiameter = 0.3302; // 13 inch
 
-class GazeboMotorModel : public MotorModel, public ModelPlugin {
+static constexpr double rho = 1.225;
+
+class GazeboMotorPropModel : public MotorModel, public ModelPlugin {
  public:
-  GazeboMotorModel()
+  GazeboMotorPropModel()
       : ModelPlugin(),
         MotorModel(),
         command_sub_topic_(kDefaultCommandSubTopic),
@@ -87,23 +87,21 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
         motor_number_(0),
         motor_Failure_Number_(0),
         turning_direction_(turning_direction::CW),
-        max_force_(kDefaultMaxForce),
-        max_rot_velocity_(kDefaulMaxRotVelocity),
-        max_power_(0.0),
-        moment_constant_(kDefaultMomentConstant),
-        motor_constant_(kDefaultMotorConstant),
+        max_rot_velocity_(kDefaultMaxRotVelocity),
         //motor_test_sub_topic_(kDefaultMotorTestSubTopic),
         ref_motor_rot_vel_(0.0),
+        propeller_diameter_(kDefaultPropellerDiameter),
         power_(0.0),
         rolling_moment_coefficient_(kDefaultRollingMomentCoefficient),
         rotor_drag_coefficient_(kDefaultRotorDragCoefficient),
         rotor_velocity_slowdown_sim_(kDefaultRotorVelocitySlowdownSim),
         time_constant_down_(kDefaultTimeConstantDown),
         time_constant_up_(kDefaultTimeConstantUp),
-        reversible_(false) {
+        efficiency_(kDefaultMotorEfficiency),
+        max_j_{1.0} {
   }
 
-  virtual ~GazeboMotorModel();
+  virtual ~GazeboMotorPropModel();
 
   virtual void InitializeParams();
   virtual void Publish();
@@ -112,7 +110,6 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
   virtual void UpdateForcesAndMoments();
   /// \brief A function to check the motor_Failure_Number_ and stimulate motor fail
   /// \details Doing joint_->SetVelocity(0,0) for the flagged motor to fail
-  virtual void UpdatePower();
   virtual void UpdateMotorFail();
   virtual void Load(physics::ModelPtr _model, sdf::ElementPtr _sdf);
   virtual void OnUpdate(const common::UpdateInfo & /*_info*/);
@@ -134,24 +131,27 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
 
   int screen_msg_flag = 1;
 
-  double max_force_;
   double max_rot_velocity_;
-  double max_power_;
-  double moment_constant_;
-  double motor_constant_;
+  double efficiency_;
+
+  double max_j_;
+  double thrust_coefficients_[5] = {0.04806607,  0.12291199, -0.30300857, -0.01328176,  0.09464044};
+  double power_coefficients_[5] = {0.33019862, -0.50123572,  0.1440476,  -0.01009774,  0.03238984};
+
   double ref_motor_rot_vel_;
   double rolling_moment_coefficient_;
   double rotor_drag_coefficient_;
   double rotor_velocity_slowdown_sim_;
   double time_constant_down_;
   double time_constant_up_;
+  double propeller_diameter_;
   double power_;
 
-  bool reversible_;
-
   transport::NodePtr node_handle_;
+
   transport::PublisherPtr motor_velocity_pub_;
   transport::PublisherPtr motor_power_pub_;
+
   transport::SubscriberPtr command_sub_;
   transport::SubscriberPtr motor_failure_sub_; /*!< Subscribing to motor_failure_sub_topic_; receiving motor number to fail, as an integer */
   transport::SubscriberPtr wind_sub_;
@@ -160,19 +160,15 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
 
   physics::ModelPtr model_;
   physics::JointPtr joint_;
-  common::PID pid_;
-  bool use_pid_;
   physics::LinkPtr link_;
   /// \brief Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
-  boost::thread callback_queue_thread_;
-  void QueueThread();
   std_msgs::msgs::Float turning_velocity_msg_;
   std_msgs::msgs::Float power_msg_;
   void VelocityCallback(CommandMotorSpeedPtr &rot_velocities);
-  void MotorFailureCallback(const boost::shared_ptr<const msgs::Int> &fail_msg);  /*!< Callback for the motor_failure_sub_ subscriber */
-  void WindVelocityCallback(const boost::shared_ptr<const physics_msgs::msgs::Wind> &msg);
+  void MotorFailureCallback(IntPtr &fail_msg);  /*!< Callback for the motor_failure_sub_ subscriber */
+  void WindVelocityCallback(WindPtr &msg);
 
   std::unique_ptr<FirstOrderFilter<double>>  rotor_velocity_filter_;
 /*
@@ -182,4 +178,4 @@ class GazeboMotorModel : public MotorModel, public ModelPlugin {
 */
 };
 }
-#endif // _GAZEBO_MOTOR_MODEL_HH_
+#endif // _GAZEBO_MOTOR_PROP_MODEL_HH_

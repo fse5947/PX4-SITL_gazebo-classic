@@ -280,6 +280,34 @@ void MavlinkInterface::SendSensorMessages(uint64_t time_usec, HILData &hil_data)
   }
 }
 
+void MavlinkInterface::SendBatteryMessages(const SensorData::Battery &data) {
+  // fill HIL GPS Mavlink msg
+  mavlink_battery_status_t battery_status_msg;
+  battery_status_msg.current_consumed = -1; /*< [mAh] Consumed charge, -1: autopilot does not provide consumption estimate*/
+  battery_status_msg.voltages[0] = data.voltage;
+  battery_status_msg.voltages[1] = UINT16_MAX; /*< [mV] Battery voltage of cells 1 to 10 (see voltages_ext for cells 11-14). Cells in this field above the valid cell count for this battery should have the UINT16_MAX value. If individual cell voltages are unknown or not measured for this battery, then the overall battery voltage should be filled in cell 0, with all others set to UINT16_MAX. If the voltage of the battery is greater than (UINT16_MAX - 1), then cell 0 should be set to (UINT16_MAX - 1), and cell 1 to the remaining voltage. This can be extended to multiple cells if the total voltage is greater than 2 * (UINT16_MAX - 1).*/
+  battery_status_msg.current_battery = data.current; /*< [cA] Battery current, -1: autopilot does not measure the current*/
+  battery_status_msg.battery_remaining = data.remaining_pct; /*< [%] Remaining battery energy. Values: [0-100], -1: autopilot does not estimate the remaining battery.*/
+  battery_status_msg.id = data.id;
+  battery_status_msg.temperature = data.temperature; /*< [cdegC] Temperature of the battery. INT16_MAX for unknown temperature.*/
+  battery_status_msg.mode = 0; /*<  Battery mode. Default (0) is that battery mode reporting is not supported or battery is in normal-use mode.*/
+
+  // battery_status_msg.energy_consumed; /*< [hJ] Consumed energy, -1: autopilot does not provide energy consumption estimate*/
+  // battery_status_msg.battery_function; /*<  Function of the battery*/
+  // battery_status_msg.type; /*<  Type (chemistry) of the battery*/
+  // battery_status_msg.time_remaining; /*< [s] Remaining battery time, 0: autopilot does not provide remaining battery time estimate*/
+  // battery_status_msg.charge_state; /*<  State for extent of discharge, provided by autopilot for warning or external reactions*/
+  // battery_status_msg.voltages_ext[4]; /*< [mV] Battery voltages for cells 11 to 14. Cells above the valid cell count for this battery should have a value of 0, where zero indicates not supported (note, this is different than for the voltages field and allows empty byte truncation). If the measured value is 0 then 1 should be sent instead.*/
+  // battery_status_msg.fault_bitmask; /*<
+
+  // send HIL_GPS Mavlink msg
+  if (!hil_mode_ || (hil_mode_ && !hil_state_level_)) {
+    mavlink_message_t msg;
+    mavlink_msg_battery_status_encode_chan(1, 200, MAVLINK_COMM_0, &msg, &battery_status_msg);
+    send_mavlink_message(&msg);
+  }
+}
+
 void MavlinkInterface::SendGpsMessages(const SensorData::Gps &data) {
   // fill HIL GPS Mavlink msg
   mavlink_hil_gps_t hil_gps_msg;
