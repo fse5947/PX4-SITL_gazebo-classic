@@ -54,6 +54,8 @@ static const std::string kDefaultMotorVelocityPubTopic = "/motor_speed";
 static const std::string kDefaultMotorPowerPubTopic = "/motor_power";
 std::string wind_sub_topic_ = "/world_wind";
 
+#define PROPPOLYDEGREE 5
+
 typedef const boost::shared_ptr<const mav_msgs::msgs::CommandMotorSpeed> CommandMotorSpeedPtr;
 typedef const boost::shared_ptr<const msgs::Int> IntPtr;
 typedef const boost::shared_ptr<const physics_msgs::msgs::Wind> WindPtr;
@@ -66,12 +68,11 @@ static const std::string kDefaultMotorTestSubTopic = "motors";
 
 static constexpr double kDefaultTimeConstantUp = 1.0 / 80.0;
 static constexpr double kDefaultTimeConstantDown = 1.0 / 40.0;
-static constexpr double kDefaultMaxRotVelocity = 838.0;
 static constexpr double kDefaultRotorDragCoefficient = 1.0e-4;
 static constexpr double kDefaultRollingMomentCoefficient = 1.0e-6;
 static constexpr double kDefaultRotorVelocitySlowdownSim = 10.0;
 static constexpr double kDefaultMotorEfficiency = 0.9;
-static constexpr double kDefaultPropellerDiameter = 0.3302; // 13 inch
+static constexpr double kDefaultPropellerDiameter = 0.3048; // 12 inch
 
 static constexpr double rho = 1.225;
 
@@ -87,7 +88,6 @@ class GazeboMotorPropModel : public MotorModel, public ModelPlugin {
         motor_number_(0),
         motor_Failure_Number_(0),
         turning_direction_(turning_direction::CW),
-        max_rot_velocity_(kDefaultMaxRotVelocity),
         //motor_test_sub_topic_(kDefaultMotorTestSubTopic),
         ref_motor_rot_vel_(0.0),
         propeller_diameter_(kDefaultPropellerDiameter),
@@ -131,12 +131,11 @@ class GazeboMotorPropModel : public MotorModel, public ModelPlugin {
 
   int screen_msg_flag = 1;
 
-  double max_rot_velocity_;
   double efficiency_;
 
   double max_j_;
-  double thrust_coefficients_[5] = {0.04806607,  0.12291199, -0.30300857, -0.01328176,  0.09464044};
-  double power_coefficients_[5] = {0.33019862, -0.50123572,  0.1440476,  -0.01009774,  0.03238984};
+  double thrust_coefficients_[PROPPOLYDEGREE] = {0.08116999, -0.00881228, -0.45067274,  0.66716955, -0.48879649}; // ancf 12x5
+  double power_coefficients_[PROPPOLYDEGREE] = {0.0272497,   0.00094377,  0.02054292, -0.19810229,  0.09776618}; // ancf 12x5
 
   double ref_motor_rot_vel_;
   double rolling_moment_coefficient_;

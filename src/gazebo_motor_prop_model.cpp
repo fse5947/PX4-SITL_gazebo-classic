@@ -75,6 +75,12 @@ void GazeboMotorPropModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
     gzthrow("[gazebo_motor_prop_model] Missing maxJ.");
   }
 
+  if (_sdf->HasElement("diameter")) {
+    propeller_diameter_ = _sdf->GetElement("diameter")->Get<double>();
+  } else {
+    gzthrow("[gazebo_motor_prop_model] Missing diameter.");
+  }
+
   // char buffer [20];
   // for (int i=0; i<5; i++) {
   //   sprintf (buffer, "thrustPolyCoef%d", i);
@@ -121,7 +127,6 @@ void GazeboMotorPropModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   getSdfParam<double>(_sdf, "rotorDragCoefficient", rotor_drag_coefficient_, rotor_drag_coefficient_);
   getSdfParam<double>(_sdf, "rollingMomentCoefficient", rolling_moment_coefficient_,
                       rolling_moment_coefficient_);
-  getSdfParam<double>(_sdf, "maxRotVelocity", max_rot_velocity_, max_rot_velocity_);
   getSdfParam<double>(_sdf, "efficiency", efficiency_, efficiency_);
 
   getSdfParam<double>(_sdf, "timeConstantUp", time_constant_up_, time_constant_up_);
@@ -172,7 +177,9 @@ void GazeboMotorPropModel::VelocityCallback(CommandMotorSpeedPtr &rot_velocities
   if(rot_velocities->motor_speed_size() < motor_number_) {
     std::cout  << "You tried to access index " << motor_number_
       << " of the MotorSpeed message array which is of size " << rot_velocities->motor_speed_size() << "." << std::endl;
-  } else ref_motor_rot_vel_ = std::min(static_cast<double>(rot_velocities->motor_speed(motor_number_)), static_cast<double>(max_rot_velocity_));
+  } else {
+    ref_motor_rot_vel_ = static_cast<double>(rot_velocities->motor_speed(motor_number_));
+  }
 }
 
 void GazeboMotorPropModel::MotorFailureCallback(IntPtr &fail_msg) {
@@ -204,15 +211,20 @@ void GazeboMotorPropModel::UpdateForcesAndMoments() {
 #endif
 
   ignition::math::Vector3d relative_wind_velocity = body_velocity - wind_vel_;
-  double va = relative_wind_velocity.Length();
+  ignition::math::Vector3d velocity_parallel_to_rotor_axis = (relative_wind_velocity.Dot(joint_axis)) * joint_axis;
+
+  double va = velocity_parallel_to_rotor_axis.Length();
   double J = va / (motor_velocity_hz * propeller_diameter_);
 
   J = std::min(max_j_, J);
 
-  double j[5] = {pow(J,4.0),pow(J,3.0),pow(J,2.0),J,1};
+  double CT = 0.0;
+  double CP = 0.0;
 
-  double CT = thrust_coefficients_[0]*j[0] + thrust_coefficients_[1]*j[1] + thrust_coefficients_[2]*j[2] + thrust_coefficients_[3]*j[3] + thrust_coefficients_[4]*j[4];
-  double CP = power_coefficients_[0]*j[0] + power_coefficients_[1]*j[1] + power_coefficients_[2]*j[2] + power_coefficients_[3]*j[3] + power_coefficients_[4]*j[4];
+  for (int i=0; i < PROPPOLYDEGREE; i++) {
+    CT += thrust_coefficients_[i] * pow(J,i);
+    CP += power_coefficients_[i] * pow(J,i);
+  }
 
   double thrust = CT * rho * pow(motor_velocity_hz,2.0) * pow(propeller_diameter_,4.0);
   double propeller_power = CP * rho * pow(motor_velocity_hz,3.0) * pow(propeller_diameter_,5.0);
@@ -221,14 +233,15 @@ void GazeboMotorPropModel::UpdateForcesAndMoments() {
 
   power_= propeller_power / efficiency_;
 
-  // gzerr << "Motor hz :" << motor_velocity_hz << ' '
-  //  << "Va :" << va << ' '
-  //  << "J :" << J << ' '
-  //  << "CT :" << CT << ' '
-  //  << "CP :" << CP << ' '
-  //  << "T :" << thrust << ' '
-  //  << "P :" << power_ << ' '
-  //  << "Q :" << torque << '\n';
+  // gzerr << "Motor hz :" << motor_velocity_hz << ", "
+  //  << "Va error: " << va - relative_wind_velocity.Length() << ", "
+  //  << "Va: " << va << ", "
+  //  << "J: " << J << ", "
+  //  << "CT: " << CT << ", "
+  //  << "CP: " << CP << ", "
+  //  << "T: " << thrust << ", "
+  //  << "P: " << power_ << ", "
+  //  << "Q: " << torque << '\n';
 
   // Apply a force to the link.
   link_->AddRelativeForce(ignition::math::Vector3d(0, 0, thrust));

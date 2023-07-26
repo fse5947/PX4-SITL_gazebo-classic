@@ -348,8 +348,8 @@
       <turningDirection>cw</turningDirection>
       <timeConstantUp>0.0125</timeConstantUp>
       <timeConstantDown>0.025</timeConstantDown>
-      <maxRotVelocity>1500</maxRotVelocity>
-      <maxJ>0.677661</maxJ>
+      <maxJ>0.594431</maxJ>
+      <diameter>0.3048</diameter> <!--12 inch-->
       <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
       <motorNumber>4</motorNumber>
       <rotorDragCoefficient>0.0</rotorDragCoefficient>
@@ -381,7 +381,7 @@
       <batteryTopic>/battery</batteryTopic>
       <capacity>45</capacity> <!--Wh-->
       <nominalCapacity>70</nominalCapacity> <!--Wh-->
-      <nominalVoltage>12.6</nominalVoltage>
+      <nominalVoltage>16.4</nominalVoltage>
     </plugin>
     <plugin name='mavlink_interface' filename='libgazebo_mavlink_interface.so'>
       <robotNamespace></robotNamespace>
@@ -416,7 +416,7 @@
         <channel name="rotor4">
           <input_index>4</input_index>
           <input_offset>0</input_offset>
-          <input_scaling>1500</input_scaling>
+          <input_scaling>1025</input_scaling>
           <zero_position_disarmed>0</zero_position_disarmed>
           <zero_position_armed>0</zero_position_armed>
           <joint_control_type>velocity</joint_control_type>
