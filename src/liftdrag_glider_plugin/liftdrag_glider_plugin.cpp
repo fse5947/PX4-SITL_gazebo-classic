@@ -357,6 +357,27 @@ void LiftDragGliderPlugin::OnUpdate()
                       Cnp, Cnr, Clr, DCL, DCm, DCD, DCl, DCn,
                       &Fx, &Fy, &Fz, &Mx, &My, &Mz, &L, &D);
 
+  if (!isfinite(CD)) gzerr << "CD is " << CD << std::endl;
+  if (!isfinite(CL)) gzerr << "CL is " << CL << std::endl;
+  if (!isfinite(Cm)) gzerr << "Cm is " << Cm << std::endl;
+  if (!isfinite(CYb)) gzerr << "CYb is " << CYb << std::endl;
+  if (!isfinite(Cnb)) gzerr << "Cnb is " << Cnb << std::endl;
+  if (!isfinite(Clb)) gzerr << "Clb is " << Clb << std::endl;
+  if (!isfinite(CLq)) gzerr << "CLq is " << CLq << std::endl;
+  if (!isfinite(Cmq)) gzerr << "Cmq is " << Cmq << std::endl;
+  if (!isfinite(CLad)) gzerr << "CLad is " << CLad << std::endl;
+  if (!isfinite(Cmad)) gzerr << "Cmad is " << Cmad << std::endl;
+  if (!isfinite(Clp)) gzerr << "Clp is " << Clp << std::endl;
+  if (!isfinite(CYp)) gzerr << "CYp is " << CYp << std::endl;
+  if (!isfinite(Cnp)) gzerr << "Cnp is " << Cnp << std::endl;
+  if (!isfinite(Cnr)) gzerr << "Cnr is " << Cnr << std::endl;
+  if (!isfinite(Clr)) gzerr << "Clr is " << Clr << std::endl;
+  if (!isfinite(DCL)) gzerr << "DCL is " << DCL << std::endl;
+  if (!isfinite(DCm)) gzerr << "DCm is " << DCm << std::endl;
+  if (!isfinite(DCD)) gzerr << "DCD is " << DCD << std::endl;
+  if (!isfinite(DCl)) gzerr << "DCl is " << DCl << std::endl;
+  if (!isfinite(DCn)) gzerr << "DCn is " << DCn << std::endl;
+
   ignition::math::Vector3d Force_b = ignition::math::Vector3d(Fx, Fy, Fz);
   ignition::math::Vector3d Moment_b = ignition::math::Vector3d(Mx, My, Mz);
 
@@ -375,19 +396,39 @@ void LiftDragGliderPlugin::OnUpdate()
 
   if (0)
   {
-    gzdbg << "=============================\n";
+    // gzdbg << "=============================\n";
     // gzdbg << "sensor: [" << this->GetHandle() << "]\n";
     // gzdbg << "Link: [" << this->link->GetName()
-    gzdbg << "Aileron deflection: " << controlAngle_lail * 180 / M_PI << "\n";
-    gzdbg << "Elevator deflection: " << controlAngle_elev * 180 / M_PI << "\n";
-    gzdbg << "Rudder deflection: " << controlAngle_rudd * 180 / M_PI << "\n";
-    std::cout << "Vb: [" << V_r << "]\n";
+    // std::cout << "Ail: " << controlAngle_lail * 180 / M_PI << " ";
+    // std::cout << "Elev: " << controlAngle_elev * 180 / M_PI << " ";
+    // std::cout << "Rud: " << controlAngle_rudd * 180 / M_PI << " ";
+    // std::cout << "CD " << CD << " ";
+    // std::cout << "CL " << CL << " ";
+    // std::cout << "Cm " << Cm << " ";
+    // std::cout << "CYb " << CYb << " ";
+    // std::cout << "Cnb " << Cnb << " ";
+    // std::cout << "Clb " << Clb << " ";
+    // std::cout << "CLq " << CLq << " ";
+    // std::cout << "Cmq " << Cmq << " ";
+    // std::cout << "CLad " << CLad << " ";
+    // std::cout << "Cmad " << Cmad << " ";
+    // std::cout << "Clp " << Clp << " ";
+    // std::cout << "CYp " << CYp << " ";
+    // std::cout << "Cnp " << Cnp << " ";
+    // std::cout << "Cnr " << Cnr << " ";
+    // std::cout << "Clr " << Clr << " ";
+    // std::cout << "DCL " << DCL << " ";
+    // std::cout << "DCm " << DCm << " ";
+    // std::cout << "DCD " << DCD << " ";
+    // std::cout << "DCl " << DCl << " ";
+    // std::cout << "DCn " << DCn << " ";
+    // std::cout << "V_r: [" << V_r << "] ";
     // gzdbg << "Vel_wind_b: [" << Vel_wind_b << "]\n";
     // gzdbg << "V_w_grad: [" << V_w_grad << "]\n";
     // gzdbg << "omega_w_b: [" << omega_w_b << "]\n";
     // gzdbg << "alpha: " << alpha * 180 / M_PI << "\n";
-    std::cout << "Force_b: " << Force_b << std::endl;
-    std::cout << "Moment_b: " << Moment_b << "\n";
+    // std::cout << "Force_b: " << Force_b << " ";
+    // std::cout << "Moment_b: " << Moment_b << "\n";
     // gzdbg << "Position: [" << position << "]\n";
     // gzdbg << "V_w_grad: [" << _wind_gradient << "]\n";
     // gzdbg << "Vel_wind_b_grad: [" << Vel_wind_b_grad << "]\n";
