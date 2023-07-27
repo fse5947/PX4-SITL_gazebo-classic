@@ -15,6 +15,7 @@
     <plugin name='wind_plugin' filename='libgazebo_wind_plugin.so'>
       <frameId>base_link</frameId>
       <robotNamespace/>
+      <aircraftModel>phoenix2400</aircraftModel>
       <windVelocityMean>0.0</windVelocityMean>
       <windVelocityMax>0.0</windVelocityMax>
       <windVelocityVariance>0</windVelocityVariance>

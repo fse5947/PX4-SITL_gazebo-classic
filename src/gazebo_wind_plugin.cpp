@@ -68,7 +68,9 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
   getSdfParam<ignition::math::Vector3d>(sdf, "windGustDirectionMean", wind_gust_direction_mean_, wind_gust_direction_mean_);
   getSdfParam<double>(sdf, "windGustDirectionVariance", wind_gust_direction_variance_, wind_gust_direction_variance_);
 
-  groundtruth_sub_ = node_handle_->Subscribe("~/glider" + groundtruth_sub_topic_, &GazeboWindPlugin::GroundtruthCallback, this);
+  getSdfParam<std::string>(sdf, "aircraftModel", aircraft_, aircraft_);
+
+  groundtruth_sub_ = node_handle_->Subscribe("~/" + aircraft_ + groundtruth_sub_topic_, &GazeboWindPlugin::GroundtruthCallback, this);
 
   wind_direction_mean_.Normalize();
   wind_gust_direction_mean_.Normalize();
@@ -314,7 +316,7 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
   // Calculate wind from thermal updrafts
   thermal_manager_.UpdateTime(now.Double());
 
-  auto wind_thermal = thermal_manager_.getWind(position_);
+  auto wind_thermal = (position_.IsFinite()) ? thermal_manager_.getWind(position_) : ignition::math::Vector3d(0.0,0.0,0.0);
 
   gazebo::msgs::Vector3d* wind_v = new gazebo::msgs::Vector3d();
   wind_v->set_x(wind.X() + wind_gust.X());
@@ -328,8 +330,6 @@ void GazeboWindPlugin::OnUpdate(const common::UpdateInfo& _info) {
   wind_pub_->Publish(wind_msg);
 }
 
-GZ_REGISTER_WORLD_PLUGIN(GazeboWindPlugin);
-
 void GazeboWindPlugin::GroundtruthCallback(GtPtr& groundtruth_msg) {
   auto lat_rad = groundtruth_msg->latitude_rad();
   auto lon_rad = groundtruth_msg->longitude_rad();
@@ -337,6 +337,8 @@ void GazeboWindPlugin::GroundtruthCallback(GtPtr& groundtruth_msg) {
 
   position_ = project(lat_rad, lon_rad, alt_rad, lat_home_, lon_home_, alt_home_);
 }
+
+GZ_REGISTER_WORLD_PLUGIN(GazeboWindPlugin);
 
 }
 

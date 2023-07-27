@@ -146,7 +146,7 @@
         </geometry>
         <material>
           <script>
-            <name>Gazebo/Blue</name>
+            <name>Gazebo/Red</name>
             <uri>__default__</uri>
           </script>
         </material>

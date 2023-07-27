@@ -57,6 +57,7 @@ static constexpr double kDefaultWindGustDirectionVariance = 0.0;
 
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Groundtruth> GtPtr;
 static const std::string kDefaultGroundtruthTopic = "/groundtruth";
+static const std::string kDefaultAircraft = "glider";
 
 /// \brief This gazebo plugin simulates wind acting on a model.
 class GazeboWindPlugin : public WorldPlugin {
@@ -83,9 +84,13 @@ class GazeboWindPlugin : public WorldPlugin {
         world_latitude_(0.0),
         world_longitude_(0.0),
         world_altitude_(0.0),
-        position_(0.0,0.0,0.0),
+        position_(NAN,NAN,NAN),
         thermal_manager_(0.0),
-        node_handle_(NULL) {}
+        node_handle_(NULL),
+        groundtruth_sub_(nullptr),
+        groundtruth_sub_topic_(kDefaultGroundtruthTopic),
+        aircraft_(kDefaultAircraft) {}
+
 
   virtual ~GazeboWindPlugin();
 
@@ -153,8 +158,9 @@ class GazeboWindPlugin : public WorldPlugin {
 
   transport::NodePtr node_handle_;
   transport::PublisherPtr wind_pub_;
-  transport::SubscriberPtr groundtruth_sub_{nullptr};
-  std::string groundtruth_sub_topic_{kDefaultGroundtruthTopic};
+  transport::SubscriberPtr groundtruth_sub_;
+  std::string groundtruth_sub_topic_;
+  std::string aircraft_;
 
   physics_msgs::msgs::Wind wind_msg;
 };
