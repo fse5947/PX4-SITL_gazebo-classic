@@ -1,0 +1,478 @@
+<?xml version="1.0"?>
+<sdf version='1.5'>
+  <model name='phoenix2400'>
+    <pose>0 0 0.246 0 0 0</pose>
+    <link name='base_link'>
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>2.2</mass>
+        <inertia>
+          <ixx>0.271</ixx>
+          <ixy>0</ixy>
+          <ixz>-0.0053</ixz>
+          <iyy>0.132</iyy>
+          <iyz>0</iyz>
+          <izz>0.399</izz>
+        </inertia>
+      </inertial>
+      <collision name='base_link_collision'>
+        <pose>-0.45 0 0.03 0 0 0</pose>
+        <geometry>
+          <box>
+            <size>1.3 2 0.3</size>
+          </box>
+        </geometry>
+        <surface>
+          <contact>
+            <ode>
+              <kp>100000000</kp>
+              <kd>1</kd>
+              <min_depth>0.001</min_depth>
+              <max_vel>1.0</max_vel>
+            </ode>
+          </contact>
+          <friction>
+            <ode>
+              <!--
+              <slip2>20</slip2>
+              -->
+              <mu>0.3</mu>
+              <mu2>0</mu2>
+              <fdir1>1 0 0</fdir1>
+            </ode>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='base_link_visual'>
+        <pose>-0.18 0.003 -0.1 0 0 1.5707</pose>
+        <geometry>
+          <mesh>
+            <scale>0.028 0.028 0.028</scale>
+            <uri>model://phoenix2400/meshes/phoenix2400.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/DarkGrey</name>
+            <uri>__default__</uri>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <link name='plane/imu_link'>
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.015</mass>
+        <inertia>
+          <ixx>1e-05</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>1e-05</iyy>
+          <iyz>0</iyz>
+          <izz>1e-05</izz>
+        </inertia>
+      </inertial>
+    </link>
+    <joint name='plane/imu_joint' type='revolute'>
+      <child>plane/imu_link</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>0</lower>
+          <upper>0</upper>
+          <effort>0</effort>
+          <velocity>0</velocity>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+    <include>
+      <uri>model://airspeed</uri>
+      <pose>0 0 0 0 0 0</pose>
+      <name>airspeed</name>
+    </include>
+    <joint name='airspeed_joint' type='fixed'>
+      <child>airspeed::link</child>
+      <parent>base_link</parent>
+    </joint>
+    <link name='rotor_puller'>
+      <pose>0.21 0 0.0 0 1.5707 0</pose>
+      <inertial>
+        <pose>0 0 0 0 0 0</pose>
+        <mass>0.005</mass>
+        <inertia>
+          <ixx>9.75e-07</ixx>
+          <ixy>0</ixy>
+          <ixz>0</ixz>
+          <iyy>0.000166704</iyy>
+          <iyz>0</iyz>
+          <izz>0.000167604</izz>
+        </inertia>
+      </inertial>
+      <collision name='rotor_puller_collision'>
+        <pose>0.0 0 0.0 0 0 0</pose>
+        <geometry>
+          <cylinder>
+            <length>0.005</length>
+            <radius>0.1</radius>
+          </cylinder>
+        </geometry>
+        <surface>
+          <contact>
+            <ode/>
+          </contact>
+          <friction>
+            <ode/>
+          </friction>
+        </surface>
+      </collision>
+      <visual name='rotor_puller_visual'>
+        <pose>0 0 0.0 0 0 0</pose>
+        <geometry>
+          <mesh>
+            <scale>1 1 1</scale>
+            <uri>model://phoenix2400/meshes/iris_prop_ccw.dae</uri>
+          </mesh>
+        </geometry>
+        <material>
+          <script>
+            <name>Gazebo/Red</name>
+            <uri>__default__</uri>
+          </script>
+        </material>
+      </visual>
+      <gravity>1</gravity>
+      <velocity_decay/>
+      <self_collide>0</self_collide>
+    </link>
+    <joint name='rotor_puller_joint' type='revolute'>
+      <child>rotor_puller</child>
+      <parent>base_link</parent>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <lower>-1e+16</lower>
+          <upper>1e+16</upper>
+        </limit>
+        <dynamics>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <use_parent_model_frame>1</use_parent_model_frame>
+      </axis>
+    </joint>
+
+    <link name="left_elevon">
+      <inertial>
+        <mass>0.00000001</mass>
+        <inertia>
+          <ixx>0.000001</ixx>
+          <ixy>0.0</ixy>
+          <iyy>0.000001</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>0.000001</izz>
+        </inertia>
+        <pose>0 0.3 0 0.00 0 0.0</pose>
+      </inertial>
+    </link>
+    <link name="right_elevon">
+      <inertial>
+        <mass>0.00000001</mass>
+        <inertia>
+          <ixx>0.000001</ixx>
+          <ixy>0.0</ixy>
+          <iyy>0.000001</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>0.000001</izz>
+        </inertia>
+        <pose>0 -0.3 0 0.00 0 0.0</pose>
+      </inertial>
+    </link>
+    <link name="elevator">
+      <inertial>
+        <mass>0.00000001</mass>
+        <inertia>
+          <ixx>0.000001</ixx>
+          <ixy>0.0</ixy>
+          <iyy>0.000001</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>0.000001</izz>
+        </inertia>
+        <pose> -0.5 0 0 0.00 0 0.0</pose>
+      </inertial>
+    </link>
+    <link name="rudder">
+      <inertial>
+        <mass>0.00000001</mass>
+        <inertia>
+          <ixx>0.000001</ixx>
+          <ixy>0.0</ixy>
+          <iyy>0.000001</iyy>
+          <ixz>0.0</ixz>
+          <iyz>0.0</iyz>
+          <izz>0.000001</izz>
+        </inertia>
+        <pose>-0.5 0 0.05 0 0 0 </pose>
+      </inertial>
+    </link>
+    <joint name='left_elevon_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>left_elevon</child>
+      <pose>0 0.3 0 0.00 0 0.0</pose>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <!-- -30/+30 deg. -->
+          <lower>-0.522</lower>
+          <upper>0.522</upper>
+        </limit>
+        <dynamics>
+          <damping>1.000</damping>
+        </dynamics>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+        </ode>
+      </physics>
+    </joint>
+    <joint name='right_elevon_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>right_elevon</child>
+      <pose>0 -0.3 0 0.00 0 0.0</pose>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <!-- -30/+30 deg. -->
+          <lower>-0.522</lower>
+          <upper>0.522</upper>
+        </limit>
+        <dynamics>
+          <damping>1.000</damping>
+        </dynamics>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+        </ode>
+      </physics>
+    </joint>
+    <joint name='elevator_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>elevator</child>
+      <pose> -0.5 0 0 0 0 0</pose>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <limit>
+          <!-- -30/+30 deg. -->
+          <lower>-0.522</lower>
+          <upper>0.522</upper>
+        </limit>
+        <dynamics>
+          <damping>1.000</damping>
+        </dynamics>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+        </ode>
+      </physics>
+    </joint>
+    <joint name='rudder_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>rudder</child>
+      <pose>-0.5 0 0.05 0.00 0 0.0</pose>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <limit>
+          <!-- -30/+30 deg. -->
+          <lower>-0.522</lower>
+          <upper>0.522</upper>
+        </limit>
+        <dynamics>
+          <damping>1.000</damping>
+        </dynamics>
+      </axis>
+      <physics>
+        <ode>
+          <implicit_spring_damper>1</implicit_spring_damper>
+        </ode>
+      </physics>
+    </joint>
+    <include>
+      <uri>model://gps</uri>
+      <pose>0 0 0 0 0 0</pose>
+      <name>gps</name>
+    </include>
+    <joint name='gps_joint' type='fixed'>
+      <child>gps::link</child>
+      <parent>base_link</parent>
+    </joint>
+    <plugin name="aircraft" filename="libLiftDragGliderPlugin.so">
+      <!-- Geometry -->
+      <area>0.5</area>
+      <span>2.8</span>
+      <chord>0.1910</chord>
+      <link_name>base_link</link_name>
+      <control_joint_left_ail>
+        left_elevon_joint
+      </control_joint_left_ail>
+      <control_joint_right_ail>
+        right_elevon_joint
+      </control_joint_right_ail>
+      <control_joint_elev>
+        elevator_joint
+      </control_joint_elev>
+      <control_joint_rudd>
+         rudder_joint
+      </control_joint_rudd>
+      <robotNamespace></robotNamespace>
+      <windSubTopic>world_wind</windSubTopic>
+      <!-- Datcom aerodynamics csv files-->
+      <AeroAlpha_FilePath>model://phoenix2400/aero_alpha.csv</AeroAlpha_FilePath>
+      <AeroMach_FilePath>model://phoenix2400/aero_mach.csv</AeroMach_FilePath>
+      <AeroXc_FilePath>model://phoenix2400/aero_xc.csv</AeroXc_FilePath>
+      <AeroCoeff_FilePath>model://phoenix2400/aero_coeff.csv</AeroCoeff_FilePath>
+      <AeroSym_FilePath>model://phoenix2400/aero_sym.csv</AeroSym_FilePath>
+      <AeroAsym_FilePath>model://phoenix2400/aero_asym.csv</AeroAsym_FilePath>
+    </plugin>
+
+    <plugin name='puller' filename='libgazebo_motor_prop_model.so'>
+      <robotNamespace></robotNamespace>
+      <jointName>rotor_puller_joint</jointName>
+      <linkName>rotor_puller</linkName>
+      <turningDirection>cw</turningDirection>
+      <timeConstantUp>0.0125</timeConstantUp>
+      <timeConstantDown>0.025</timeConstantDown>
+      <maxJ>0.594431</maxJ>
+      <diameter>0.3048</diameter> <!--12 inch-->
+      <commandSubTopic>/gazebo/command/motor_speed</commandSubTopic>
+      <motorNumber>3</motorNumber>
+      <rotorDragCoefficient>0.0</rotorDragCoefficient>
+      <rollingMomentCoefficient>0.0</rollingMomentCoefficient>
+      <motorSpeedPubTopic>/motor_speed/3</motorSpeedPubTopic>
+      <motorSpeedPubTopic>/motor_power/3</motorSpeedPubTopic>
+      <rotorVelocitySlowdownSim>15</rotorVelocitySlowdownSim>
+      <robotNamespace></robotNamespace>
+    </plugin>
+    <plugin name='groundtruth_plugin' filename='libgazebo_groundtruth_plugin.so'>
+      <robotNamespace/>
+    </plugin>
+    <plugin name='magnetometer_plugin' filename='libgazebo_magnetometer_plugin.so'>
+      <robotNamespace/>
+      <pubRate>100</pubRate>
+      <noiseDensity>0.0004</noiseDensity>
+      <randomWalk>6.4e-06</randomWalk>
+      <biasCorrelationTime>600</biasCorrelationTime>
+      <magTopic>/mag</magTopic>
+    </plugin>
+    <plugin name='barometer_plugin' filename='libgazebo_barometer_plugin.so'>
+      <robotNamespace/>
+      <pubRate>50</pubRate>
+      <baroTopic>/baro</baroTopic>
+    </plugin>
+    <plugin name='battery_plugin' filename='libgazebo_battery_plugin.so'>
+      <robotNamespace/>
+      <pubRate>50</pubRate>
+      <batteryTopic>/battery</batteryTopic>
+      <capacity>45</capacity> <!--Wh-->
+      <nominalCapacity>70</nominalCapacity> <!--Wh-->
+      <nominalVoltage>16.4</nominalVoltage>
+    </plugin>
+    <plugin name='mavlink_interface' filename='libgazebo_mavlink_interface.so'>
+      <robotNamespace></robotNamespace>
+      <imuSubTopic>/imu</imuSubTopic>
+      <magSubTopic>/mag</magSubTopic>
+      <baroSubTopic>/baro</baroSubTopic>
+      <mavlink_addr>INADDR_ANY</mavlink_addr>
+      <mavlink_tcp_port>4560</mavlink_tcp_port>
+      <mavlink_udp_port>14560</mavlink_udp_port>
+      <serialEnabled>1</serialEnabled>
+      <serialDevice>/dev/ttyACM0</serialDevice>
+      <baudRate>921600</baudRate>
+      <qgc_addr>INADDR_ANY</qgc_addr>
+      <qgc_udp_port>14550</qgc_udp_port>
+      <sdk_addr>INADDR_ANY</sdk_addr>
+      <sdk_udp_port>14540</sdk_udp_port>
+      <hil_mode>1</hil_mode>
+      <hil_state_level>false</hil_state_level>
+      <enable_lockstep>false</enable_lockstep>
+      <use_tcp>true</use_tcp>
+      <motorSpeedCommandPubTopic>/gazebo/command/motor_speed</motorSpeedCommandPubTopic>
+      <control_channels>
+        <channel name="rudder">
+          <input_index>2</input_index>
+          <input_offset>0</input_offset>
+          <input_scaling>1</input_scaling>
+          <zero_position_disarmed>0</zero_position_disarmed>
+          <zero_position_armed>0</zero_position_armed>
+          <joint_control_type>position_kinematic</joint_control_type>
+          <joint_name>rudder_joint</joint_name>
+        </channel>
+        <channel name="rotor4">
+          <input_index>3</input_index>
+          <input_offset>0</input_offset>
+          <input_scaling>1025</input_scaling>
+          <zero_position_disarmed>0</zero_position_disarmed>
+          <zero_position_armed>0</zero_position_armed>
+          <joint_control_type>velocity</joint_control_type>
+          <joint_name>rotor_puller_joint</joint_name>
+        </channel>
+        <channel name="left_elevon">
+          <input_index>5</input_index>
+          <input_offset>0</input_offset>
+          <input_scaling>1</input_scaling>
+          <zero_position_disarmed>0</zero_position_disarmed>
+          <zero_position_armed>0</zero_position_armed>
+          <joint_control_type>position_kinematic</joint_control_type>
+          <joint_name>left_elevon_joint</joint_name>
+        </channel>
+        <channel name="right_elevon">
+          <input_index>6</input_index>
+          <input_offset>0</input_offset>
+          <input_scaling>1</input_scaling>
+          <zero_position_disarmed>0</zero_position_disarmed>
+          <zero_position_armed>0</zero_position_armed>
+          <joint_control_type>position_kinematic</joint_control_type>
+          <joint_name>right_elevon_joint</joint_name>
+        </channel>
+        <channel name="elevator">
+          <input_index>7</input_index>
+          <input_offset>0</input_offset>
+          <input_scaling>1</input_scaling>
+          <zero_position_disarmed>0</zero_position_disarmed>
+          <zero_position_armed>0</zero_position_armed>
+          <joint_control_type>position_kinematic</joint_control_type>
+          <joint_name>elevator_joint</joint_name>
+        </channel>
+      </control_channels>
+    </plugin>
+    <static>0</static>
+    <plugin name='gazebo_imu_plugin' filename='libgazebo_imu_plugin.so'>
+      <robotNamespace></robotNamespace>
+      <linkName>plane/imu_link</linkName>
+      <imuTopic>/imu</imuTopic>
+      <gyroscopeNoiseDensity>0.0003394</gyroscopeNoiseDensity>
+      <gyroscopeRandomWalk>3.8785e-05</gyroscopeRandomWalk>
+      <gyroscopeBiasCorrelationTime>1000.0</gyroscopeBiasCorrelationTime>
+      <gyroscopeTurnOnBiasSigma>0.0087</gyroscopeTurnOnBiasSigma>
+      <accelerometerNoiseDensity>0.004</accelerometerNoiseDensity>
+      <accelerometerRandomWalk>0.006</accelerometerRandomWalk>
+      <accelerometerBiasCorrelationTime>300.0</accelerometerBiasCorrelationTime>
+      <accelerometerTurnOnBiasSigma>0.196</accelerometerTurnOnBiasSigma>
+    </plugin>
+  </model>
+</sdf>
