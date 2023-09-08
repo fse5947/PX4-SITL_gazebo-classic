@@ -428,6 +428,7 @@ void GazeboMavlinkInterface::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf
   baro_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + baro_sub_topic_, &GazeboMavlinkInterface::BarometerCallback, this);
   battery_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + battery_sub_topic_, &GazeboMavlinkInterface::BatteryCallback, this);
   wind_sub_ = node_handle_->Subscribe("~/" + wind_sub_topic_, &GazeboMavlinkInterface::WindVelocityCallback, this);
+  motor_speed_sub_ = node_handle_->Subscribe("~/" + model_->GetName() + motor_speed_sub_topic_, &GazeboMavlinkInterface::RPMCallback, this);
 
   // Get the model joints
   auto joints = model_->GetJoints();
@@ -623,7 +624,6 @@ void GazeboMavlinkInterface::OnUpdate(const common::UpdateInfo&  /*_info*/) {
     // TODO Add timestamp and Header
     // turning_velocities_msg->header.stamp.sec = current_time.sec;
     // turning_velocities_msg->header.stamp.nsec = current_time.nsec;
-
     motor_velocity_reference_pub_->Publish(turning_velocities_msg);
   }
 
@@ -1119,6 +1119,15 @@ void GazeboMavlinkInterface::WindVelocityCallback(WindPtr& msg) {
   wind.down = -msg->velocity().z();
 
   mavlink_interface_->SendWindGroundTruthMessages(wind);
+}
+
+void GazeboMavlinkInterface::RPMCallback(FloatPtr& msg) {
+  SensorData::RPM rpm;
+
+  rpm.index = 1;
+  rpm.frequency = msg->data() * 60.0; // Convert from Hz to RPM
+
+  mavlink_interface_->SendRawRPMMessages(rpm);
 }
 
 void GazeboMavlinkInterface::handle_actuator_controls() {

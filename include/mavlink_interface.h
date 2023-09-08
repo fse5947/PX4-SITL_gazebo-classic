@@ -140,6 +140,12 @@ namespace SensorData {
         double down;
     };
 
+    struct RPM
+    {
+        uint8_t index;
+        double frequency;
+    };
+
 }
 
 struct HILData {
@@ -173,6 +179,7 @@ public:
     void SendHeartbeat();
     void SendBatteryMessages(const SensorData::Battery &data);
     void SendWindGroundTruthMessages(const SensorData::Wind &data);
+    void SendRawRPMMessages(const SensorData::RPM &data);
     void SendSensorMessages(const uint64_t time_usec);
     void SendSensorMessages(const uint64_t time_usec, HILData &hil_data);
     void SendGpsMessages(const SensorData::Gps &data);

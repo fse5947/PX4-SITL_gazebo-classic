@@ -364,7 +364,7 @@
       <rotorDragCoefficient>0.0</rotorDragCoefficient>
       <rollingMomentCoefficient>0.0</rollingMomentCoefficient>
       <motorSpeedPubTopic>/motor_speed/4</motorSpeedPubTopic>
-      <motorSpeedPubTopic>/motor_power/4</motorSpeedPubTopic>
+      <motorPowerPubTopic>/motor_power/4</motorPowerPubTopic>
       <rotorVelocitySlowdownSim>15</rotorVelocitySlowdownSim>
       <robotNamespace></robotNamespace>
     </plugin>

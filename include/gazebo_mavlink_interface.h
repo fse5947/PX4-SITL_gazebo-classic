@@ -70,6 +70,7 @@
 #include <Pressure.pb.h>
 #include <Wind.pb.h>
 #include <Battery.pb.h>
+#include <Float.pb.h>
 
 #include "mavlink_interface.h"
 #include "msgbuffer.h"
@@ -96,6 +97,7 @@ typedef const boost::shared_ptr<const sensor_msgs::msgs::MagneticField> Magnetom
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Pressure> BarometerPtr;
 typedef const boost::shared_ptr<const sensor_msgs::msgs::Battery> BatteryPtr;
 typedef const boost::shared_ptr<const physics_msgs::msgs::Wind> WindPtr;
+typedef const boost::shared_ptr<const std_msgs::msgs::Float> FloatPtr;
 
 typedef std::pair<const int, const ignition::math::Quaterniond> SensorIdRot_P;
 typedef std::map<transport::SubscriberPtr, SensorIdRot_P > Sensor_M;
@@ -116,6 +118,7 @@ static const std::string kDefaultBarometerTopic = "/baro";
 static const std::string kDefaultWindTopic = "/world_wind";
 static const std::string kDefaultBatteryTopic = "/battery";
 static const std::string kDefaultGroundtruthTopic = "/groundtruth";
+static const std::string kDefaultMotorSpeedTopic = "/motor_speed/4";
 
 //! OR operation for the enumeration and unsigned types that returns the bitmask
 template<typename A, typename B>
@@ -187,6 +190,7 @@ private:
   void BarometerCallback(BarometerPtr& baro_msg);
   void BatteryCallback(BatteryPtr& msg);
   void WindVelocityCallback(WindPtr& msg);
+  void RPMCallback(FloatPtr& msg);
   void SendSensorMessages();
   void SendGroundTruth();
   void handle_actuator_controls();
@@ -236,6 +240,7 @@ private:
   transport::SubscriberPtr wind_sub_{nullptr};
   transport::SubscriberPtr baro_sub_{nullptr};
   transport::SubscriberPtr battery_sub_{nullptr};
+  transport::SubscriberPtr motor_speed_sub_{nullptr};
 
   Sensor_M sensor_map_{}; // Map of sensor SubscriberPtr, IDs and orientations
 
@@ -248,6 +253,7 @@ private:
   std::string baro_sub_topic_{kDefaultBarometerTopic};
   std::string battery_sub_topic_{kDefaultBatteryTopic};
   std::string wind_sub_topic_{kDefaultWindTopic};
+  std::string motor_speed_sub_topic_{kDefaultMotorSpeedTopic};
 
   std::mutex last_imu_message_mutex_ {};
   std::condition_variable last_imu_message_cond_ {};

@@ -32,9 +32,9 @@ GazeboMotorPropModel::~GazeboMotorPropModel() {
 void GazeboMotorPropModel::InitializeParams() {}
 
 void GazeboMotorPropModel::Publish() {
-  //turning_velocity_msg_.set_data(joint_->GetVelocity(0));
+  motor_velocity_msg_.set_data(motor_velocity_hz_);
   // FIXME: Commented out to prevent warnings about queue limit reached.
-  // motor_velocity_pub_->Publish(turning_velocity_msg_);
+  motor_velocity_pub_->Publish(motor_velocity_msg_);
   power_msg_.set_data(power_);
   motor_power_pub_->Publish(power_msg_);
 }
@@ -141,7 +141,7 @@ void GazeboMotorPropModel::Load(physics::ModelPtr _model, sdf::ElementPtr _sdf) 
   //std::cout << "[gazebo_motor_prop_model]: Subscribe to gz topic: "<< motor_failure_sub_topic_ << std::endl;
   motor_failure_sub_ = node_handle_->Subscribe<msgs::Int>(motor_failure_sub_topic_, &GazeboMotorPropModel::MotorFailureCallback, this);
   // FIXME: Commented out to prevent warnings about queue limit reached.
-  //motor_velocity_pub_ = node_handle_->Advertise<std_msgs::msgs::Float>("~/" + model_->GetName() + motor_speed_pub_topic_, 1);
+  motor_velocity_pub_ = node_handle_->Advertise<std_msgs::msgs::Float>("~/" + model_->GetName() + motor_speed_pub_topic_, 1);
   motor_power_pub_ = node_handle_->Advertise<std_msgs::msgs::Float>("~/" + model_->GetName() + motor_power_pub_topic_, 1);
   wind_sub_ = node_handle_->Subscribe("~/" + wind_sub_topic_, &GazeboMotorPropModel::WindVelocityCallback, this);
 
@@ -193,9 +193,9 @@ void GazeboMotorPropModel::UpdateForcesAndMoments() {
   }
   double real_motor_velocity = motor_rot_vel_ * rotor_velocity_slowdown_sim_;
 
-  double motor_velocity_hz = std::abs(real_motor_velocity) / (2 * M_PI);
+  motor_velocity_hz_ = std::abs(real_motor_velocity) / (2 * M_PI);
 
-  if (motor_velocity_hz <= 0.1) {
+  if (motor_velocity_hz_ <= 0.1) {
     return;
   }
 
@@ -214,7 +214,7 @@ void GazeboMotorPropModel::UpdateForcesAndMoments() {
   ignition::math::Vector3d velocity_parallel_to_rotor_axis = (relative_wind_velocity.Dot(joint_axis)) * joint_axis;
 
   double va = velocity_parallel_to_rotor_axis.Length();
-  double J = va / (motor_velocity_hz * propeller_diameter_);
+  double J = va / (motor_velocity_hz_ * propeller_diameter_);
 
   J = std::min(max_j_, J);
 
@@ -226,14 +226,14 @@ void GazeboMotorPropModel::UpdateForcesAndMoments() {
     CP += power_coefficients_[i] * pow(J,i);
   }
 
-  double thrust = CT * rho * pow(motor_velocity_hz,2.0) * pow(propeller_diameter_,4.0);
-  double propeller_power = CP * rho * pow(motor_velocity_hz,3.0) * pow(propeller_diameter_,5.0);
+  double thrust = CT * rho * pow(motor_velocity_hz_,2.0) * pow(propeller_diameter_,4.0);
+  double propeller_power = CP * rho * pow(motor_velocity_hz_,3.0) * pow(propeller_diameter_,5.0);
 
   double torque = propeller_power / std::abs(real_motor_velocity);
 
   power_= propeller_power / efficiency_;
 
-  // gzerr << "Motor hz :" << motor_velocity_hz << ", "
+  // gzerr << "Motor hz :" << motor_velocity_hz_ << ", "
   //  << "Va error: " << va - relative_wind_velocity.Length() << ", "
   //  << "Va: " << va << ", "
   //  << "J: " << J << ", "
