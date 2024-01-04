@@ -38,7 +38,7 @@
       </Thermals>-->
       <keepThermalNED>0</keepThermalNED>
       <!--<thermalFile>model://thermals/sink_only.json</thermalFile>-->
-      <thermalFile>model://thermals/6.00h_0.010_wind_env2_instance2.json</thermalFile>
+      <thermalFile>model://thermals/6.00h_MEDIUM_instance0_v0.2.json</thermalFile>
       <windPubTopic>world_wind</windPubTopic>
     </plugin>
     <physics name='default_physics' default='0' type='ode'>

@@ -25,6 +25,10 @@ bool ConstantThermal::ShouldSpawn(double &time)
     std::cout << "Should spawn\n";
     return true;
 }
+double ConstantThermal::getNetUpdraft()
+{
+    return (strength_ * 9.0 * M_PI * pow(radius_,2.0) / exp(9.0));
+}
 ignition::math::Vector3d ConstantThermal::getWind(ignition::math::Vector3d &position)
 {
 
@@ -64,6 +68,11 @@ ignition::math::Vector3d DynamicThermal::getWind(ignition::math::Vector3d &posit
     strength_ = (decay_exp + raise_exp - 1.0) * max_strength_;
 
     return ConstantThermal::getWind(position);
+}
+
+double DynamicThermal::getNetUpdraft()
+{
+    return (strength_ * 9.0 * M_PI * pow(radius_,2.0) / exp(9.0));
 }
 
 bool DynamicThermal::isOver()

@@ -8,13 +8,17 @@ bool IsDead(boost::shared_ptr<Thermal> thermal) { return thermal->isOver(); }
 void ThermalManager::UpdateTime(double time) {
 
     SpawnThermals(time);
+    double net_updraft{0.0};
+
     for (auto& thermal : active_thermals_){
         thermal->UpdateTime(time);
+        net_updraft += thermal->getNetUpdraft();
     }
     // https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
     auto prev_size = active_thermals_.size();
     active_thermals_.erase(remove_if(active_thermals_.begin(), active_thermals_.end(), IsDead), active_thermals_.end());
     auto nbr_deletions = prev_size - active_thermals_.size();
+    computeEnvSink(net_updraft);
     // if (nbr_deletions > 0)
     //     cout << '[' << int(time) << ']' << " Removed: " << nbr_deletions << " thermals, now " << active_thermals_.size() << " thermals\n";
 }

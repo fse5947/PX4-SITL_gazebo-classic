@@ -210,10 +210,9 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
       gzwarn << "Using thermal NED coordination base on home position\n";
     }
 
-    if (thermal_data.isMember("env_sink")) {
-      auto env_sink = thermal_data["env_sink"].asDouble();
-      thermal_manager_.setEnvSink(env_sink);
-      gzdbg << "Env sink: " << env_sink << '\n';
+    if (thermal_data.isMember("area")) {
+      auto area = thermal_data["area"].asDouble();
+      thermal_manager_.setArea(area);
     }
 
     if (!thermal_data.isMember("thermals"))
