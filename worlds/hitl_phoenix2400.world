@@ -46,8 +46,36 @@
     <include>
       <uri>model://asphalt_plane</uri>
     </include>
+    <plugin name='wind_plugin' filename='libgazebo_wind_plugin.so'>
+    <frameId>base_link</frameId>
+    <robotNamespace/>
+    <aircraftModel>phoenix2400</aircraftModel>
+    <windVelocityMean>0.0</windVelocityMean>
+    <windVelocityMax>0.0</windVelocityMax>
+    <windVelocityVariance>0</windVelocityVariance>
+    <windDirectionMean>0 1 0</windDirectionMean>
+    <windDirectionVariance>0</windDirectionVariance>
+    <windGustStart>0</windGustStart>
+    <windGustDuration>0</windGustDuration>
+    <windGustVelocityMean>0</windGustVelocityMean>
+    <windGustVelocityMax>0.0</windGustVelocityMax>
+    <windGustVelocityVariance>0</windGustVelocityVariance>
+    <windGustDirectionMean>1 0 0</windGustDirectionMean>
+    <windGustDirectionVariance>0</windGustDirectionVariance>
+    <!-- Thermal Updraft
+    <Thermals>
+      <Thermal_1>
+        <centerCoordinates>51.4876 -2.15056 0</centerCoordinates>
+        <ThermalStrength>5.0</ThermalStrength>
+        <ThermalRadius>150.0</ThermalRadius>
+      </Thermal_1>
+    </Thermals>-->
+    <keepThermalNED>0</keepThermalNED>
+    <thermalFile>model://thermals/6.00h_0.010_wind_env2_instance2.json</thermalFile>
+    <windPubTopic>world_wind</windPubTopic>
+    </plugin>
     <include>
-      <uri>model://phoenix2400</uri>
+      <uri>model://phoenix2400_hitl</uri>
       <pose>1.01 0.98 0.83 0 0 1.14</pose>
     </include>
   </world>

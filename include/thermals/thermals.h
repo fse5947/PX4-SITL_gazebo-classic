@@ -29,6 +29,7 @@ public:
     virtual bool inRange(ignition::math::Vector3d &position) = 0;
     virtual bool ShouldSpawn(double &time) = 0;
     virtual bool isOver() = 0;
+    virtual double getNetUpdraft() = 0;
     virtual ignition::math::Vector3d getWind(ignition::math::Vector3d &position) = 0;
 };
 
@@ -41,6 +42,7 @@ public:
     virtual bool inRange(ignition::math::Vector3d &position);
     virtual bool ShouldSpawn(double &time);
     virtual bool isOver();
+    virtual double getNetUpdraft();
     virtual ignition::math::Vector3d getWind(ignition::math::Vector3d &position);
 
 protected:
@@ -57,6 +59,7 @@ public:
     virtual void UpdateTime(double &time);
     virtual bool ShouldSpawn(double &time);
     virtual bool isOver();
+    virtual double getNetUpdraft();
     virtual ignition::math::Vector3d getWind(ignition::math::Vector3d &position);
 
 private:

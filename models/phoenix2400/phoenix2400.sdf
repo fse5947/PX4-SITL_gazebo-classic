@@ -364,7 +364,7 @@
       <rotorDragCoefficient>0.0</rotorDragCoefficient>
       <rollingMomentCoefficient>0.0</rollingMomentCoefficient>
       <motorSpeedPubTopic>/motor_speed/4</motorSpeedPubTopic>
-      <motorSpeedPubTopic>/motor_power/4</motorSpeedPubTopic>
+      <motorPowerPubTopic>/motor_power</motorPowerPubTopic>
       <rotorVelocitySlowdownSim>15</rotorVelocitySlowdownSim>
       <robotNamespace></robotNamespace>
     </plugin>
@@ -388,7 +388,7 @@
       <robotNamespace/>
       <pubRate>50</pubRate>
       <batteryTopic>/battery</batteryTopic>
-      <capacity>45</capacity> <!--Wh-->
+      <capacity>55</capacity> <!--Wh-->
       <nominalCapacity>70</nominalCapacity> <!--Wh-->
       <nominalVoltage>16.4</nominalVoltage>
     </plugin>

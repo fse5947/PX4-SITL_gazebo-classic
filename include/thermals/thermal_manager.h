@@ -20,7 +20,8 @@ public:
     ThermalManager(double env_sink): env_sink_(env_sink) {};
     virtual ~ThermalManager() {};
     virtual void UpdateTime(double time);
-    virtual void setEnvSink(double value) {env_sink_ = value;};
+    virtual void setArea(double value) {area_ = value;};
+    virtual void computeEnvSink(double net_updraft) {env_sink_ = net_updraft / area_;};
     virtual void addThermal(ignition::math::Vector3d &center, double &strength, double &radius);
     virtual void addThermal(ignition::math::Vector3d &center, double &radius, double &max_strength, double &spawn_time, double &rise_time_factor, double &active_period);
     virtual ignition::math::Vector3d getWind(ignition::math::Vector3d &position);
@@ -33,6 +34,7 @@ private:
     std::list<boost::shared_ptr<Thermal>>::iterator next_to_spawn_ = thermals_.end();
 
     double env_sink_{0.0};
+    double area_{1.0};
     bool in_thermal_{false};
 };
 #endif // _THERMAL_MANAGER_HH_

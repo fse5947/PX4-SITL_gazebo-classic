@@ -210,21 +210,16 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
       gzwarn << "Using thermal NED coordination base on home position\n";
     }
 
-    if (thermal_data.isMember("env_sink")) {
-      auto env_sink = thermal_data["env_sink"].asDouble();
-      thermal_manager_.setEnvSink(env_sink);
-      gzdbg << "Env sink: " << env_sink << '\n';
+    if (thermal_data.isMember("area")) {
+      auto area = thermal_data["area"].asDouble();
+      thermal_manager_.setArea(area);
     }
 
     if (!thermal_data.isMember("thermals"))
       gzthrow("No thermals found in file.");
 
-    auto thermals = thermal_data["thermals"];
-
-
-
-    for (int i = 0; i < thermals.size(); i++){
-      auto thermal = thermals[i];
+    for (int i = 0; i < thermal_data["thermals"].size(); i++){
+      auto thermal = thermal_data["thermals"][i];
       if (!thermal.isMember("n") || !thermal.isMember("e") || !thermal.isMember("d"))
         gzthrow("Thermal missing coordinate");
       if (!thermal.isMember("spawn_time"))
@@ -253,7 +248,7 @@ void GazeboWindPlugin::Load(physics::WorldPtr world, sdf::ElementPtr sdf) {
       double spawn_time = thermal["spawn_time"].asDouble();
       double rise_time_factor = thermal["eta"].asDouble();
       double active_period = thermal["active_period"].asDouble();
-      //gzdbg << "Adding thermal at NED: ["<< centerCoordinates_NED.X()<<","<< centerCoordinates_NED.Y() << "]\n";
+      std::cout << "Adding thermal at NED: ["<< centerCoordinates_NED.X()<<","<< centerCoordinates_NED.Y() << "]\n";
 
       thermal_manager_.addThermal(centerCoordinates_NED,radius,max_strength,spawn_time,rise_time_factor,active_period);
     }

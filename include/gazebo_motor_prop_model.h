@@ -145,6 +145,7 @@ class GazeboMotorPropModel : public MotorModel, public ModelPlugin {
   double time_constant_up_;
   double propeller_diameter_;
   double power_;
+  double motor_velocity_hz_;
 
   transport::NodePtr node_handle_;
 
@@ -163,7 +164,7 @@ class GazeboMotorPropModel : public MotorModel, public ModelPlugin {
   /// \brief Pointer to the update event connection.
   event::ConnectionPtr updateConnection_;
 
-  std_msgs::msgs::Float turning_velocity_msg_;
+  std_msgs::msgs::Float motor_velocity_msg_;
   std_msgs::msgs::Float power_msg_;
   void VelocityCallback(CommandMotorSpeedPtr &rot_velocities);
   void MotorFailureCallback(IntPtr &fail_msg);  /*!< Callback for the motor_failure_sub_ subscriber */
